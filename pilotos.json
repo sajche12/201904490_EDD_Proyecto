@@ -1,0 +1,19 @@
+[
+	{
+		"nombre": "John Doe",
+		"nacionalidad": "Estados Unidos",
+		"numero_de_id": "P12345678",
+		"vuelo": "A100",
+		"horas_de_vuelo": 600,
+		"tipo_de_licencia": "PPL"
+	},
+	{
+		"nombre": "Jane Smith",
+		"nacionalidad": "Reino Unido",
+		"numero_de_id": "P98765432",
+		"vuelo": "A200",
+		"horas_de_vuelo": 100,
+		"tipo_de_licencia": "CPL"
+	}
+]
+]

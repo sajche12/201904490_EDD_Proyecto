@@ -1,0 +1,20 @@
+[
+	{
+		"vuelo": "A100",
+		"numero_de_registro": "N12345",
+		"modelo": "Boeing 737",
+		"capacidad": 180,
+		"aerolinea": "AirlineX",
+		"ciudad_destino": "Madrid",
+		"estado": "Disponible"
+	},
+	{
+		"vuelo": "A101",
+		"numero_de_registro": "N67890",
+		"modelo": "Boeing 848",
+		"capacidad": 200,
+		"aerolinea": "AirlineY",
+		"ciudad_destino": "Barcelona",
+		"estado": "Mantenimiento"
+	}
+]

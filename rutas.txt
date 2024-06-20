@@ -1,0 +1,7 @@
+Cadiz/Sevilla/125;
+Sevilla/Cadiz/125;
+Sevilla/Granada/256;
+Granada/Sevilla/256;
+Sevilla/Jaen/242;
+Jaen/Sevilla/242;
+Granada/Jaen/99;
