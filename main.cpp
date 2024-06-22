@@ -19,15 +19,18 @@ void cargarAviones();
 void cargarPilotos();
 void cargarRutas();
 void cargarMovimientos();
-int contarLineas();
 void consultarHorasVuelo();
 void recomendarRuta();
 void visualizarReportes();
+PilotoBB convertirPiloto(const Piloto& piloto);
 
 // Variables globales
 //NodoArbolB* raiz = nullptr;
 ListaCircularDoble<Avion> listaAvionesMantenimiento;
-ArbolBinarioBusqueda<Piloto> arbolPilotos;
+ArbolBinarioBusqueda arbolPilotos;
+ListaAdyacencia listaRutas;
+ArbolB arbolDisponible;
+Vuelo vueloNuevo;
 
 // Funcion principal
 int main() {
@@ -115,7 +118,13 @@ void cargarAviones() {
 
         // Agregar el avión avionNuevo a la lista de aviones verificando su estado
         if (avionNuevo.getEstado() == "Disponible") {
-            //arbolDisponible()
+            strcpy(vueloNuevo.vuelo, avionNuevo.getVuelo().c_str());
+            strcpy(vueloNuevo.numero_de_registro, avionNuevo.getNumeroDeRegistro().c_str());
+            strcpy(vueloNuevo.modelo, avionNuevo.getModelo().c_str());
+            vueloNuevo.capacidad = avionNuevo.getCapacidad();
+            strcpy(vueloNuevo.aerolinea, avionNuevo.getAerolinea().c_str());
+            strcpy(vueloNuevo.ciudad_destino, avionNuevo.getCiudadDestino().c_str());
+            arbolDisponible.insertar(vueloNuevo);
         } else if (avionNuevo.getEstado() == "Mantenimiento") {
             listaAvionesMantenimiento.insertar(avionNuevo);
         }
@@ -153,21 +162,40 @@ void cargarPilotos() {
     // Cerrar el archivo
     ifs.close();
 
+    // Recorrer el JSON y agregar los pilotos al árbol de búsqueda binaria
     for (const auto& piloto : root) {
-        Piloto pilotoNuevo(piloto["nombre"].asString(), piloto["nacionalidad"].asString(), piloto["numero_id"].asString(), piloto["vuelo"].asString(), piloto["horas_vuelo"].asInt(), piloto["tipo_licencia"].asString());
-        arbolPilotos.insertar(pilotoNuevo);
+        string nombre = piloto["nombre"].asString();
+        string nacionalidad = piloto["nacionalidad"].asString();
+        string numeroId = piloto["numero_de_id"].asString();
+        string vuelo = piloto["vuelo"].asString();
+        int horasVuelo = piloto["horas_de_vuelo"].asInt();
+        string tipoLicencia = piloto["tipo_de_licencia"].asString();
+
+        // Creacion de objeto Piloto y conversion a PilotoBB
+        Piloto pilotoNuevo(nombre, nacionalidad, numeroId, vuelo, horasVuelo, tipoLicencia);
+        PilotoBB pilotoNuevoBB = convertirPiloto(pilotoNuevo);
+        arbolPilotos.insertar(pilotoNuevoBB);
     }
 
     cout << "\nPilotos cargados exitosamente.\n" << endl;
 }
 
+PilotoBB convertirPiloto(const Piloto& piloto) {
+    PilotoBB pilotoBB;
+    pilotoBB.nombre = piloto.nombre;
+    pilotoBB.nacionalidad = piloto.nacionalidad;
+    pilotoBB.numero_de_id = piloto.numero_de_id;
+    pilotoBB.vuelo = piloto.vuelo;
+    pilotoBB.horas_de_vuelo = piloto.horas_de_vuelo;
+    pilotoBB.tipo_de_licencia = piloto.tipo_de_licencia;
+    return pilotoBB;
+}
+
 void cargarRutas() {
     ifstream file("rutas.txt");
     string linea;
-    int contador_lineas = contarLineas();
 
     if (file.is_open()) {
-        ListaAdyacencia listaRutas(contador_lineas);
         cout << "\nMovimientos realizados:" << endl;
         while (getline(file, linea)) {
             // Extraer la palabra que se encuentra antes de /
@@ -176,7 +204,8 @@ void cargarRutas() {
             string destino = linea.substr(linea.find("/") + 1, linea.find_last_of("/") - linea.find("/") - 1);
             // Extraer la palabra que se encuentra despues de / y / y convertirla a entero
             int distancia = stoi(linea.substr(linea.find_last_of("/") + 1));
-            
+            cout << "Origen: " << origen << ", Destino: " << destino << ", Distancia: " << distancia << endl;
+
             // Agregar la arista a la lista de adyacencia
             listaRutas.agregarArista(origen, destino, distancia);
         }
@@ -185,26 +214,48 @@ void cargarRutas() {
     cout << "\nRutas cargadas exitosamente.\n" << endl;
 }
 
-int contarLineas() {
-    ifstream file("rutas.txt");
-    string linea;
-    int contador = 0;
-
-    if (file.is_open()) {
-        while (getline(file, linea)) {
-            contador++;
-        }
-    }
-    file.close();
-    return contador;
-}
-
 void cargarMovimientos() {
     cout << "Cargar movimientos" << endl;
 }
 
 void consultarHorasVuelo() {
-    cout << "Consultar horas de vuelo" << endl;
+    int opcion;
+    do {
+        cout << "**********************************" << endl;
+        cout << "**    Seleccione el recorrido   **" << endl;
+        cout << "**1. Pre-Orden                  **" << endl;
+        cout << "**2. In-Orden                   **" << endl;
+        cout << "**3. Post-Orden                 **" << endl;
+        cout << "**4. Regresar al Menu Principal **" << endl;
+        cout << "**********************************" << endl;
+        cout << endl;
+        cout << "Seleccione una opcion: ";
+        cin >> opcion;
+
+        switch (opcion) {
+            case 1:
+                cout << "Recorrido Pre-Orden:" << endl;
+                arbolPilotos.mostrarPreOrden();
+                cout << endl;
+                break;
+            case 2:
+                cout << "Recorrido In-Orden:" << endl;
+                arbolPilotos.mostrarEnOrden();
+                cout << endl;
+                break;
+            case 3:
+                cout << "Recorrido Post-Orden:" << endl;
+                arbolPilotos.mostrarPostOrden();
+                cout << endl;
+                break;
+            case 4:
+                break;
+            default:
+                cout << "Opcion no valida" << endl;
+                cout << endl;
+                break;
+        }
+    } while (opcion != 4);
 }
 
 void recomendarRuta() {
@@ -215,8 +266,26 @@ void recomendarRuta() {
     cout << "Destino: ";
     cin >> destino;
 
-    
-    
+    auto resultado = listaRutas.rutaCorta(origen, destino);
+    // Paso 4: Verificar si la ruta es válida
+    if (resultado.second != -1) {
+        cout << endl;
+        // Paso 5: Imprimir la ruta y la distancia
+        cout << "Ruta más corta de " << origen << " a " << destino << ":\n";
+        for (const auto& nodo : resultado.first) {
+            // Si el nodo es el último, no imprimir la flecha
+            if (nodo == resultado.first.back()) {
+                cout << nodo;
+            } else {
+                cout << nodo << " -> ";
+            }
+        }
+        cout << "\nDistancia: " << resultado.second << " km" << endl;
+    } else {
+        cout << endl;
+        cout << "No se encontró ruta de " << origen << " a " << destino << "." << endl;
+    }
+    cout << endl;
 }
 
 void visualizarReportes() {

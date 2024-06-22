@@ -2,153 +2,136 @@
 #define ARBOLB_H
 
 #include <iostream>
-using namespace std;
+#include <cstring>
 
-// Definición de la estructura Node para el árbol B de grado 5
-template <typename T>
-struct Node {
-    bool hoja; // Si el nodo es una hoja
-    int numLlaves; // Número de llaves actuales en el nodo
-    T llaves[4]; // Arreglo de llaves
-    Node<T>* hijos[5]; // Arreglo de punteros a hijos
+const int GRADO = 5; // Grado del árbol B
 
-    Node(bool esHoja) {
-        hoja = esHoja;
-        numLlaves = 0;
-        for (int i = 0; i < 5; i++) {
+struct Vuelo {
+    char vuelo[10];
+    char numero_de_registro[10];
+    char modelo[20];
+    int capacidad;
+    char aerolinea[20];
+    char ciudad_destino[20];
+    char estado[15];
+
+    Vuelo() {
+        strcpy(estado, "Mantenimiento");
+    }
+};
+
+struct NodoB {
+    Vuelo llaves[GRADO - 1];
+    NodoB* hijos[GRADO];
+    int num_llaves;
+    bool hoja;
+
+    NodoB() {
+        num_llaves = 0;
+        hoja = true;
+        for (int i = 0; i < GRADO; i++) {
             hijos[i] = nullptr;
         }
     }
 };
 
-template <typename T>
 class ArbolB {
 public:
-    ArbolB() : raiz(nullptr) {}
+    ArbolB() {
+        raiz = new NodoB();
+    }
 
-    void insertar(const T& llave);
-    void recorrer() { recorrer(raiz); }
+    void insertar(const Vuelo& vuelo) {
+        NodoB* r = raiz;
+        if (r->num_llaves == GRADO - 1) {
+            NodoB* s = new NodoB();
+            raiz = s;
+            s->hoja = false;
+            s->hijos[0] = r;
+            dividirHijo(s, 0, r);
+            insertarNoLleno(s, vuelo);
+        } else {
+            insertarNoLleno(r, vuelo);
+        }
+    }
 
-    // Destructor
-    ~ArbolB() {
-        delete raiz;
+    void imprimir() {
+        imprimir(raiz, 0);
     }
 
 private:
-    Node<T>* raiz;
+    NodoB* raiz;
 
-    void insertarNoLleno(Node<T>* nodo, const T& llave);
-    void dividirHijo(Node<T>* nodo, int i, Node<T>* hijo);
-    void recorrer(Node<T>* nodo);
+    void dividirHijo(NodoB* x, int i, NodoB* y) {
+        NodoB* z = new NodoB();
+        z->hoja = y->hoja;
+        z->num_llaves = (GRADO / 2) - 1;
 
-    // Funciones auxiliares
-    int encontrarLlave(Node<T>* nodo, const T& llave);
-};
+        for (int j = 0; j < (GRADO / 2) - 1; j++) {
+            z->llaves[j] = y->llaves[j + (GRADO / 2)];
+        }
 
-template <typename T>
-void ArbolB<T>::insertar(const T& llave) {
-    if (raiz == nullptr) {
-        raiz = new Node<T>(true);
-        raiz->llaves[0] = llave;
-        raiz->numLlaves = 1;
-    } else {
-        if (raiz->numLlaves == 4) {
-            Node<T>* nuevoNode = new Node<T>(false);
-            nuevoNode->hijos[0] = raiz;
-            dividirHijo(nuevoNode, 0, raiz);
-            int i = 0;
-            if (nuevoNode->llaves[0] < llave) {
-                i++;
+        if (!y->hoja) {
+            for (int j = 0; j < GRADO / 2; j++) {
+                z->hijos[j] = y->hijos[j + (GRADO / 2)];
             }
-            insertarNoLleno(nuevoNode->hijos[i], llave);
-            raiz = nuevoNode;
+        }
+
+        y->num_llaves = (GRADO / 2) - 1;
+
+        for (int j = x->num_llaves; j >= i + 1; j--) {
+            x->hijos[j + 1] = x->hijos[j];
+        }
+
+        x->hijos[i + 1] = z;
+
+        for (int j = x->num_llaves - 1; j >= i; j--) {
+            x->llaves[j + 1] = x->llaves[j];
+        }
+
+        x->llaves[i] = y->llaves[(GRADO / 2) - 1];
+        x->num_llaves++;
+    }
+
+    void insertarNoLleno(NodoB* x, const Vuelo& vuelo) {
+        int i = x->num_llaves - 1;
+        if (x->hoja) {
+            while (i >= 0 && strcmp(vuelo.numero_de_registro, x->llaves[i].numero_de_registro) < 0) {
+                x->llaves[i + 1] = x->llaves[i];
+                i--;
+            }
+            x->llaves[i + 1] = vuelo;
+            x->num_llaves++;
         } else {
-            insertarNoLleno(raiz, llave);
-        }
-    }
-}
-
-template <typename T>
-void ArbolB<T>::insertarNoLleno(Node<T>* nodo, const T& llave) {
-    int i = nodo->numLlaves - 1;
-
-    if (nodo->hoja) {
-        while (i >= 0 && nodo->llaves[i] > llave) {
-            nodo->llaves[i + 1] = nodo->llaves[i];
-            i--;
-        }
-        nodo->llaves[i + 1] = llave;
-        nodo->numLlaves++;
-    } else {
-        while (i >= 0 && nodo->llaves[i] > llave) {
-            i--;
-        }
-        i++;
-        if (nodo->hijos[i]->numLlaves == 4) {
-            dividirHijo(nodo, i, nodo->hijos[i]);
-            if (nodo->llaves[i] < llave) {
-                i++;
+            while (i >= 0 && strcmp(vuelo.numero_de_registro, x->llaves[i].numero_de_registro) < 0) {
+                i--;
             }
-        }
-        insertarNoLleno(nodo->hijos[i], llave);
-    }
-}
-
-template <typename T>
-void ArbolB<T>::dividirHijo(Node<T>* nodo, int i, Node<T>* hijo) {
-    Node<T>* nuevoHijo = new Node<T>(hijo->hoja);
-    nuevoHijo->numLlaves = 2;
-
-    for (int j = 0; j < 2; j++) {
-        nuevoHijo->llaves[j] = hijo->llaves[j + 2];
-    }
-
-    if (!hijo->hoja) {
-        for (int j = 0; j < 3; j++) {
-            nuevoHijo->hijos[j] = hijo->hijos[j + 2];
+            i++;
+            if (x->hijos[i]->num_llaves == GRADO - 1) {
+                dividirHijo(x, i, x->hijos[i]);
+                if (strcmp(vuelo.numero_de_registro, x->llaves[i].numero_de_registro) > 0) {
+                    i++;
+                }
+            }
+            insertarNoLleno(x->hijos[i], vuelo);
         }
     }
 
-    hijo->numLlaves = 2;
-
-    for (int j = nodo->numLlaves; j >= i + 1; j--) {
-        nodo->hijos[j + 1] = nodo->hijos[j];
-    }
-
-    nodo->hijos[i + 1] = nuevoHijo;
-
-    for (int j = nodo->numLlaves - 1; j >= i; j--) {
-        nodo->llaves[j + 1] = nodo->llaves[j];
-    }
-
-    nodo->llaves[i] = hijo->llaves[2];
-    nodo->numLlaves++;
-}
-
-template <typename T>
-void ArbolB<T>::recorrer(Node<T>* nodo) {
-    if (nodo != nullptr) {
-        int i;
-        for (i = 0; i < nodo->numLlaves; i++) {
+    void imprimir(NodoB* nodo, int nivel) {
+        if (nodo != nullptr) {
+            for (int i = 0; i < nodo->num_llaves; i++) {
+                for (int j = 0; j < nivel; j++) {
+                    std::cout << "    ";
+                }
+                std::cout << nodo->llaves[i].numero_de_registro << " " << nodo->llaves[i].vuelo << " " << nodo->llaves[i].modelo << " " << nodo->llaves[i].capacidad << " " << nodo->llaves[i].aerolinea << " " << nodo->llaves[i].ciudad_destino << " " << nodo->llaves[i].estado << std::endl;
+            }
             if (!nodo->hoja) {
-                recorrer(nodo->hijos[i]);
+                for (int i = 0; i <= nodo->num_llaves; i++) {
+                    imprimir(nodo->hijos[i], nivel + 1);
+                }
             }
-            cout << " " << nodo->llaves[i];
-        }
-
-        if (!nodo->hoja) {
-            recorrer(nodo->hijos[i]);
         }
     }
-}
-
-template <typename T>
-int ArbolB<T>::encontrarLlave(Node<T>* nodo, const T& llave) {
-    int i = 0;
-    while (i < nodo->numLlaves && nodo->llaves[i] < llave) {
-        i++;
-    }
-    return i;
-}
+};
 
 #endif // ARBOLB_H

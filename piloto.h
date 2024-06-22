@@ -3,38 +3,23 @@
 
 #include <string>
 
-class Piloto
-{
+class Piloto {
 public:
-    Piloto(const std::string &nombre, const std::string &nacionalidad, const std::string &numeroId, const std::string &vuelo, int horasVuelo, const std::string &tipoLicencia)
-        : nombre(nombre), nacionalidad(nacionalidad), numeroId(numeroId), vuelo(vuelo), horasVuelo(horasVuelo), tipoLicencia(tipoLicencia) {}
-
-    std::string getNombre() const { return nombre; }
-    std::string getNacionalidad() const { return nacionalidad; }
-    std::string getNumeroId() const { return numeroId; }
-    std::string getVuelo() const { return vuelo; }
-    int getHorasVuelo() const { return horasVuelo; }
-    std::string getTipoLicencia() const { return tipoLicencia; }
-
-    // Sobrecarga del operador 
-    bool operator<(const Piloto& otro) const {
-        return horasVuelo < otro.horasVuelo;
-    }
-
-    bool operator>(const Piloto& otro) const {
-        return horasVuelo > otro.horasVuelo;
-    }
-
-    // Destructor
-    ~Piloto() {}
-
-private:
     std::string nombre;
     std::string nacionalidad;
-    std::string numeroId;
+    std::string numero_de_id;
     std::string vuelo;
-    int horasVuelo;
-    std::string tipoLicencia;
+    int horas_de_vuelo;
+    std::string tipo_de_licencia;
+
+    Piloto(const std::string& nombre,
+        const std::string& nacionalidad,
+        const std::string& numero_de_id,
+        const std::string& vuelo,
+        int horas_de_vuelo,
+        const std::string& tipo_de_licencia)
+        : nombre(nombre), nacionalidad(nacionalidad), numero_de_id(numero_de_id),
+        vuelo(vuelo), horas_de_vuelo(horas_de_vuelo), tipo_de_licencia(tipo_de_licencia) {}
 };
 
 #endif // PILOTO_H

@@ -2,72 +2,103 @@
 #define LISTA_ADYACENCIA_H
 
 #include <iostream>
-#include <cstring>
-using namespace std;
+#include <vector>
+#include <string>
 
-struct NodoLA {
-    string origen;
-    string destino;
+const int INFINITO = 1e9; // Representa un valor "infinito" grande
+
+struct Arista {
+    std::string destino;
     int distancia;
-    NodoLA* siguiente;
+
+    Arista(std::string dest, int dist) : destino(dest), distancia(dist) {}
 };
 
-struct ListaAdyacencia {
-    int numNodos;
-    NodoLA** lista;
-    
-    ListaAdyacencia(int n) {
-        numNodos = n;
-        lista = new NodoLA*[n];
-        for (int i = 0; i < n; i++)
-            lista[i] = nullptr;
-    }
+struct NodoLA {
+    std::string origen;
+    std::vector<Arista> aristas;
 
-    void agregarArista(string origen, string destino, int distancia) {
-        NodoLA* nuevoNodo = new NodoLA;
-        nuevoNodo->origen = origen;
-        nuevoNodo->destino = destino;
-        nuevoNodo->distancia = distancia;
-        nuevoNodo->siguiente = nullptr;
+    NodoLA(std::string orig) : origen(orig) {}
+};
 
-        int indiceOrigen = buscarIndice(origen);
-        if (indiceOrigen == -1) {
-            cout << "El nodo origen no existe" << endl;
-            return;
-        }
+class ListaAdyacencia {
+private:
+    std::vector<NodoLA> nodos;
 
-        NodoLA* temp = lista[indiceOrigen];
-        if (temp == nullptr)
-            lista[indiceOrigen] = nuevoNodo;
-        else {
-            while (temp->siguiente != nullptr)
-                temp = temp->siguiente;
-            temp->siguiente = nuevoNodo;
-        }
-    }
-
-    int buscarIndice(string nodo) {
-        for (int i = 0; i < numNodos; i++) {
-            NodoLA* temp = lista[i];
-            while (temp != nullptr) {
-                if (temp->origen == nodo)
-                    return i;
-                temp = temp->siguiente;
+    NodoLA* encontrarNodoLA(const std::string& origen) {
+        for (auto& nodo : nodos) {
+            if (nodo.origen == origen) {
+                return &nodo;
             }
         }
-        return -1;
+        return nullptr;
     }
 
-    void imprimirLista() {
-        for (int i = 0; i < numNodos; i++) {
-            NodoLA* temp = lista[i];
-            cout << "NodoLA " << i << ": ";
-            while (temp != nullptr) {
-                cout << "(" << temp->origen << ", " << temp->destino << ", " << temp->distancia << ") ";
-                temp = temp->siguiente;
+    int encontrarIndiceNodoLA(const std::string& nombre) const {
+        for (int i = 0; i < nodos.size(); ++i) {
+            if (nodos[i].origen == nombre) {
+                return i;
             }
-            cout << endl;
         }
+        return -1; // No encontrado
+    }
+
+    std::pair<std::vector<std::string>, int> buscarRutaMinima(int indiceActual, int indiceDestino, int distanciaAcumulada, std::vector<int>& distanciasMinimas, std::vector<std::string>& rutaActual) const {
+        if (indiceActual == indiceDestino) {
+            rutaActual.push_back(nodos[indiceActual].origen);
+            return {rutaActual, distanciaAcumulada};
+        }
+        if (distanciaAcumulada >= distanciasMinimas[indiceActual]) {
+            return {{}, INFINITO};
+        }
+        distanciasMinimas[indiceActual] = distanciaAcumulada;
+        std::pair<std::vector<std::string>, int> mejorRuta = {{}, INFINITO};
+
+        for (const auto& arista : nodos[indiceActual].aristas) {
+            int indiceDestinoArista = encontrarIndiceNodoLA(arista.destino);
+            if (indiceDestinoArista != -1) {
+                std::vector<std::string> rutaSiguiente = rutaActual;
+                rutaSiguiente.push_back(nodos[indiceActual].origen);
+                auto resultado = buscarRutaMinima(indiceDestinoArista, indiceDestino, distanciaAcumulada + arista.distancia, distanciasMinimas, rutaSiguiente);
+                if (resultado.second < mejorRuta.second) {
+                    mejorRuta = resultado;
+                }
+            }
+        }
+
+        return mejorRuta;
+    }
+
+public:
+    void agregarArista(const std::string& origen, const std::string& destino, int distancia) {
+        NodoLA* nodoOrigen = encontrarNodoLA(origen);
+        if (nodoOrigen == nullptr) {
+            nodos.push_back(NodoLA(origen));
+            nodoOrigen = &nodos.back();
+        }
+        nodoOrigen->aristas.emplace_back(destino, distancia);
+    }
+
+    void mostrarLista() const {
+        for (const auto& nodo : nodos) {
+            std::cout << "Origen: " << nodo.origen << " -> ";
+            for (const auto& arista : nodo.aristas) {
+                std::cout << "(Destino: " << arista.destino << ", Distancia: " << arista.distancia << ") ";
+            }
+            std::cout << std::endl;
+        }
+    }
+
+    std::pair<std::vector<std::string>, int> rutaCorta(const std::string& origen, const std::string& destino) const {
+        int indiceOrigen = encontrarIndiceNodoLA(origen);
+        int indiceDestino = encontrarIndiceNodoLA(destino);
+        if (indiceOrigen == -1 || indiceDestino == -1) return {{}, -1};
+
+        std::vector<int> distanciasMinimas(nodos.size(), INFINITO);
+        std::vector<std::string> ruta;
+        auto resultado = buscarRutaMinima(indiceOrigen, indiceDestino, 0, distanciasMinimas, ruta);
+        if (resultado.second == INFINITO) return {{}, -1};
+        return resultado;
     }
 };
 

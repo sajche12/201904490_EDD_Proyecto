@@ -2,76 +2,136 @@
 #define ARBOL_BINARIO_H
 
 #include <iostream>
+#include <string>
 
-// Definición del nodo del árbol
-template <typename T>
-struct NodoBB {
-    T dato;
-    NodoBB* izquierda;
-    NodoBB* derecha;
-    
-    NodoBB(T valor) : dato(valor), izquierda(nullptr), derecha(nullptr) {}
+// Definimos la estructura del objeto a almacenar
+struct PilotoBB {
+    std::string nombre;
+    std::string nacionalidad;
+    std::string numero_de_id;
+    std::string vuelo;
+    int horas_de_vuelo;
+    std::string tipo_de_licencia;
 };
 
-// Definición del árbol binario de búsqueda
-template <typename T>
+// Definimos la estructura del nodo del árbol
+struct NodoBB {
+    PilotoBB datos;
+    NodoBB* izquierdo;
+    NodoBB* derecho;
+
+    NodoBB(const PilotoBB& piloto) : datos(piloto), izquierdo(nullptr), derecho(nullptr) {}
+};
+
+// Definimos la clase del Árbol Binario de Búsqueda
 class ArbolBinarioBusqueda {
 private:
-    NodoBB<T>* raiz;
+    NodoBB* raiz;
+    mutable bool esPrimerValor = true;
 
-    // Función auxiliar para insertar un valor en el árbol
-    NodoBB<T>* insertarNodo(NodoBB<T>* nodo, T valor) {
+    // Función auxiliar para insertar_piloto un nodo en el árbol
+    NodoBB* insertar_piloto(NodoBB* nodo, const PilotoBB& piloto) {
         if (nodo == nullptr) {
-            return new NodoBB<T>(valor);
+            return new NodoBB(piloto);
         }
-        if (valor < nodo->dato) {
-            nodo->izquierda = insertarNodo(nodo->izquierda, valor);
-        } else if (valor > nodo->dato) {
-            nodo->derecha = insertarNodo(nodo->derecha, valor);
+
+        if (piloto.horas_de_vuelo < nodo->datos.horas_de_vuelo) {
+            nodo->izquierdo = insertar_piloto(nodo->izquierdo, piloto);
+        } else {
+            nodo->derecho = insertar_piloto(nodo->derecho, piloto);
         }
+
         return nodo;
     }
 
-    // Función auxiliar para buscar un valor en el árbol
-    bool buscarNodo(NodoBB<T>* nodo, T valor) {
-        if (nodo == nullptr) {
-            return false;
+    // Función auxiliar para buscar un nodo en el árbol
+    NodoBB* buscar(NodoBB* nodo, int horas_de_vuelo) const {
+        if (nodo == nullptr || nodo->datos.horas_de_vuelo == horas_de_vuelo) {
+            return nodo;
         }
-        if (valor == nodo->dato) {
-            return true;
-        } else if (valor < nodo->dato) {
-            return buscarNodo(nodo->izquierda, valor);
+
+        if (horas_de_vuelo < nodo->datos.horas_de_vuelo) {
+            return buscar(nodo->izquierdo, horas_de_vuelo);
         } else {
-            return buscarNodo(nodo->derecha, valor);
+            return buscar(nodo->derecho, horas_de_vuelo);
         }
     }
 
-    // Función auxiliar para imprimir el árbol en orden
-    void imprimirEnOrden(NodoBB<T>* nodo) {
+    // Modificación de la función enOrden para incluir el nivel de profundidad
+    void enOrden(NodoBB* nodo) const {
         if (nodo != nullptr) {
-            imprimirEnOrden(nodo->izquierda);
-            std::cout << nodo->dato << " ";
-            imprimirEnOrden(nodo->derecha);
+            enOrden(nodo->izquierdo);
+            if (!esPrimerValor) {
+                std::cout << ", ";
+            }
+            std::cout << nodo->datos.horas_de_vuelo;
+            esPrimerValor = false;
+            enOrden(nodo->derecho);
+        }
+    }   
+
+    // Método para recorrer el árbol en preorden
+    void preOrden(NodoBB* nodo) const {
+        if (nodo != nullptr) {
+            if (!esPrimerValor) {
+                std::cout << ", ";
+            }
+            std::cout << nodo->datos.horas_de_vuelo;
+            esPrimerValor = false;
+            preOrden(nodo->izquierdo);
+            preOrden(nodo->derecho);
+        }
+    }
+
+    // Método para recorrer el árbol en postorden
+    void postOrden(NodoBB* nodo) const {
+        if (nodo != nullptr) {
+            postOrden(nodo->izquierdo);
+            postOrden(nodo->derecho);
+            if (!esPrimerValor) {
+                std::cout << ", ";
+            }
+            std::cout << nodo->datos.horas_de_vuelo;
+            esPrimerValor = false;
         }
     }
 
 public:
-    // Constructor
     ArbolBinarioBusqueda() : raiz(nullptr) {}
 
-    // Función para insertar un valor
-    void insertar(T valor) {
-        raiz = insertarNodo(raiz, valor);
+    // Función para insertar_piloto un nuevo piloto en el árbol
+    void insertar(const PilotoBB& piloto) {
+        raiz = insertar_piloto(raiz, piloto);
     }
 
-    // Función para buscar un valor
-    bool buscar(T valor) {
-        return buscarNodo(raiz, valor);
+    // Función para buscar un piloto por sus horas de vuelo
+    PilotoBB* buscar(int horas_de_vuelo) const {
+        NodoBB* nodo = buscar(raiz, horas_de_vuelo);
+        if (nodo != nullptr) {
+            return &nodo->datos;
+        } else {
+            return nullptr;
+        }
     }
 
-    // Función para imprimir el árbol en orden
-    void imprimir() {
-        imprimirEnOrden(raiz);
+    // Antes de llamar a cualquiera de los métodos de recorrido (enOrden, preOrden, postOrden),
+    // asegúrate de restablecer esPrimerValor a true.
+    void mostrarEnOrden() const {
+        esPrimerValor = true;
+        enOrden(raiz);
+        std::cout << std::endl; // Para finalizar la línea después del último valor
+    }
+
+    // Funciones para exponer recorridos preorden y postorden al usuario
+    void mostrarPreOrden() const {
+        esPrimerValor = true;
+        preOrden(raiz);
+        std::cout << std::endl;
+    }
+
+    void mostrarPostOrden() const {
+        esPrimerValor = true;
+        postOrden(raiz);
         std::cout << std::endl;
     }
 };
