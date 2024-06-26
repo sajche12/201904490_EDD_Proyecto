@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include "piloto.h"
+#include "graphviz/gvc.h"
 
 using namespace std;
 
@@ -12,9 +13,20 @@ private:
     Piloto** tabla; // Arreglo de punteros a la cabeza de las listas enlazadas
 
     int h(string llave) {
-        // Extraer la parte numérica de numero_de_id ignorando el primer carácter
-        int id_num = stoi(llave.substr(1));
-        return id_num % M;
+        // Paso 1: Convertir el primer carácter a su valor ASCII
+        int ascii_value = static_cast<int>(llave[0]);
+        
+        // Paso 2 y 3: Separar los dígitos del resto de la llave y sumarlos
+        int sum = 0;
+        for (size_t i = 1; i < llave.length(); ++i) {
+            sum += llave[i] - '0'; // Convertir cada carácter a entero y sumar
+        }
+        
+        // Paso 4: Sumar el valor ASCII del primer carácter
+        sum += ascii_value;
+        
+        // Paso 5: Aplicar módulo por M para obtener el índice
+        return sum % M;
     }
 
 public:
@@ -88,6 +100,40 @@ public:
             }
             cout << endl;
         }
+    }
+
+    void TablaHash::visualizarTabla() {
+        GVC_t *gvc = gvContext();
+        Agraph_t *g = agopen("TablaHash", Agdirected, 0);
+
+        // Estilos para los nodos y aristas
+        agattr(g, AGNODE, "shape", "box");
+        agattr(g, AGEDGE, "color", "blue");
+
+        for (int i = 0; i < M; ++i) {
+            char indice[10];
+            sprintf(indice, "Indice %d", i);
+            Agnode_t *nodoIndice = agnode(g, indice, 1);
+
+            Piloto* actual = tabla[i];
+            Agnode_t *nodoAnterior = nodoIndice;
+            while (actual != nullptr) {
+                char idPiloto[50];
+                sprintf(idPiloto, "%s", actual->numero_de_id.c_str());
+                Agnode_t *nodoPiloto = agnode(g, idPiloto, 1);
+                agedge(g, nodoAnterior, nodoPiloto, 0, 1);
+                nodoAnterior = nodoPiloto;
+                actual = actual->siguiente;
+            }
+        }
+
+        gvLayout(gvc, g, "dot");
+        gvRenderFilename(gvc, g, "png", "tabla_hash_visualizacion.png");
+        gvFreeLayout(gvc, g);
+        agclose(g);
+        gvFreeContext(gvc);
+
+        cout << "Visualización generada en 'tabla_hash_visualizacion.png'." << endl;
     }
 };
 

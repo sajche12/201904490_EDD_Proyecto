@@ -1,4 +1,5 @@
 digraph G {
+  rankdir = LR;
     "Cadiz" -> "Sevilla" [label="125"];
     "Sevilla" -> "Cadiz" [label="125"];
     "Sevilla" -> "Granada" [label="256"];

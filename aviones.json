@@ -16,5 +16,59 @@
 		"aerolinea": "AirlineY",
 		"ciudad_destino": "Barcelona",
 		"estado": "Mantenimiento"
+	},
+	{
+		"vuelo": "A102",
+		"numero_de_registro": "N58426",
+		"modelo": "Boeing 622",
+		"capacidad": 150,
+		"aerolinea": "AirlineW",
+		"ciudad_destino": "Milan",
+		"estado": "Disponible"
+	},
+	{
+		"vuelo": "A103",
+		"numero_de_registro": "N32048",
+		"modelo": "Airbus 920",
+		"capacidad": 300,
+		"aerolinea": "AirlineZ",
+		"ciudad_destino": "New York",
+		"estado": "Mantenimiento"
+	},
+	{
+		"vuelo": "A104",
+		"numero_de_registro": "N75482",
+		"modelo": "Airbus 455",
+		"capacidad": 300,
+		"aerolinea": "AirlineA",
+		"ciudad_destino": "Guatemala",
+		"estado": "Disponible"
+	},
+	{
+		"vuelo": "A105",
+		"numero_de_registro": "N05784",
+		"modelo": "Boeing 136",
+		"capacidad": 275,
+		"aerolinea": "AirlineB",
+		"ciudad_destino": "Ciudad de Mexico",
+		"estado": "Mantenimiento"
+	},
+	{
+		"vuelo": "A106",
+		"numero_de_registro": "N75144",
+		"modelo": "Boeing 025",
+		"capacidad": 350,
+		"aerolinea": "AirlineC",
+		"ciudad_destino": "Berlin",
+		"estado": "Mantenimiento"
+	},
+	{
+		"vuelo": "A107",
+		"numero_de_registro": "N66524",
+		"modelo": "Boeing 888",
+		"capacidad": 125,
+		"aerolinea": "AirlineC",
+		"ciudad_destino": "Costa Rica",
+		"estado": "Mantenimiento"
 	}
 ]

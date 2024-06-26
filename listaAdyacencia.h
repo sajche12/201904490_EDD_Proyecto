@@ -108,7 +108,8 @@ public:
         
         // Inicio del grafo dirigido en Graphviz
         archivo << "digraph G {" << std::endl;
-
+        archivo << "  rankdir = LR;\n";
+        
         // Recorrer todos los nodos y sus aristas para generar las instrucciones de Graphviz
         for (const auto& nodo : nodos) {
             for (const auto& arista : nodo.aristas) {

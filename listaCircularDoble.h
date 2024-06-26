@@ -1,191 +1,120 @@
 #ifndef LISTA_CIRCULAR_DOBLE_H
 #define LISTA_CIRCULAR_DOBLE_H
 
+#include "avion.h"
 #include <iostream>
 #include <string>
-
 using namespace std;
 
-template <typename Tipo>
-struct Nodo {
-    Tipo dato;
-    Nodo<Tipo>* siguiente;
-    Nodo<Tipo>* anterior;
+class Nodo {
+public:
+    Avion avion;
+    Nodo* siguiente;
+    Nodo* anterior;
 
-    Nodo(const Tipo& valor) : dato(valor), siguiente(nullptr), anterior(nullptr) {}
+    Nodo(Avion avion) : avion(avion), siguiente(nullptr), anterior(nullptr) {}
 };
 
-template <typename Tipo>
 class ListaCircularDoble {
 private:
-    Nodo<Tipo>* primero;
-    Nodo<Tipo>* ultimo;
-    int tamano;
+    Nodo* cabeza;
+    Nodo* cola;
 
 public:
-    ListaCircularDoble() : primero(nullptr), ultimo(nullptr), tamano(0) {}
-
-    ~ListaCircularDoble() {
-        vaciar();
-    }
-
-    void insertar(const Tipo& valor) {
-        Nodo<Tipo>* nuevoNodo = new Nodo<Tipo>(valor);
-
-        if (estaVacia()) {
-            primero = nuevoNodo;
-            ultimo = nuevoNodo;
-            nuevoNodo->siguiente = nuevoNodo;
-            nuevoNodo->anterior = nuevoNodo;
-        } else {
-            nuevoNodo->anterior = ultimo;
-            nuevoNodo->siguiente = primero;
-            ultimo->siguiente = nuevoNodo;
-            primero->anterior = nuevoNodo;
-            ultimo = nuevoNodo;
-        }
-
-        tamano++;
-    }
-
-    void eliminar(const Tipo& valor) {
-        if (estaVacia()) {
-            return;
-        }
-
-        Nodo<Tipo>* actual = primero;
-
-        do {
-            if (actual->dato == valor) {
-                if (actual == primero && actual == ultimo) {
-                    primero = nullptr;
-                    ultimo = nullptr;
-                } else if (actual == primero) {
-                    primero = actual->siguiente;
-                    ultimo->siguiente = primero;
-                    primero->anterior = ultimo;
-                } else if (actual == ultimo) {
-                    ultimo = actual->anterior;
-                    ultimo->siguiente = primero;
-                    primero->anterior = ultimo;
-                } else {
-                    actual->anterior->siguiente = actual->siguiente;
-                    actual->siguiente->anterior = actual->anterior;
-                }
-
-                delete actual;
-                tamano--;
-                return;
-            }
-
-            actual = actual->siguiente;
-        } while (actual != primero);
-    }
+    ListaCircularDoble() : cabeza(nullptr), cola(nullptr) {}
 
     bool estaVacia() const {
-        return tamano == 0;
+        return cabeza == nullptr;
     }
 
-    void vaciar() {
+    void agregarAvion(const Avion& avion) {
+        Nodo* nuevoNodo = new Nodo(avion);
+        if (estaVacia()) {
+            cabeza = cola = nuevoNodo;
+            cabeza->siguiente = cabeza;
+            cabeza->anterior = cabeza;
+        } else {
+            cola->siguiente = nuevoNodo;
+            nuevoNodo->anterior = cola;
+            nuevoNodo->siguiente = cabeza;
+            cabeza->anterior = nuevoNodo;
+            cola = nuevoNodo;
+        }
+    }
+
+    void mostrarLista() const {
+        if (estaVacia()) {
+            cout << "La lista está vacía." << endl;
+            return;
+        }
+        Nodo* actual = cabeza;
+        do {
+            mostrarAvion(actual->avion);
+            actual = actual->siguiente;
+        } while (actual != cabeza);
+    }
+
+    void mostrarAvion(const Avion& avion) const {
+        cout << "Vuelo: " << avion.getVuelo() << endl;
+        cout << "Número de registro: " << avion.getNumeroDeRegistro() << endl;
+        cout << "Modelo: " << avion.getModelo() << endl;
+        cout << "Capacidad: " << avion.getCapacidad() << endl;
+        cout << "Aerolínea: " << avion.getAerolinea() << endl;
+        cout << "Ciudad de destino: " << avion.getCiudadDestino() << endl;
+        cout << "Estado: " << avion.getEstado() << endl;
+        cout << "-------------------------------" << endl;
+    }
+
+        void generarDot() const {
+        ofstream archivo("listaCircularDoble.dot");
+        
+
+        archivo << "digraph G {\n";
+        archivo << "  rankdir = LR;\n";
+
         if (!estaVacia()) {
-            Nodo<Tipo>* actual = primero;
-
+            Nodo* actual = cabeza;
+            int indice = 0;
             do {
-                Nodo<Tipo>* temp = actual;
+                archivo << "  nodo" << indice << " [label=\"";
+                archivo << "Vuelo: " << actual->avion.getVuelo() << endl;
+                archivo << "Número de registro: " << actual->avion.getNumeroDeRegistro() << endl;
+                archivo << "Modelo: " << actual->avion.getModelo() << endl;
+                archivo << "Ciudad de destino: " << actual->avion.getCiudadDestino() << endl;
+                archivo << "Estado: " << actual->avion.getEstado() << endl;
+                archivo << "\"];\n";
+
+                indice++;
                 actual = actual->siguiente;
-                delete temp;
-            } while (actual != primero);
+            } while (actual != cabeza);
 
-            primero = nullptr;
-            ultimo = nullptr;
-            tamano = 0;
+            actual = cabeza;
+            indice = 0;
+            do {
+                archivo << "  nodo" << indice << " -> nodo" << ((indice + 1) % cantidadNodos()) << ";\n";
+                archivo << "  nodo" << ((indice + 1) % cantidadNodos()) << " -> nodo" << indice << ";\n";
+                indice++;
+                actual = actual->siguiente;
+            } while (actual != cabeza);
         }
+
+        archivo << "}\n";
+        archivo.close();
+
+        system("dot -Tpng listaCircularDoble.dot -o listaCircularDoble.png");
+
+        system("start listaCircularDoble.png");
     }
 
-    void imprimir() const {
-        if (estaVacia()) {
-            std::cout << "La lista esta vacia" << std::endl;
-            return;
-        }
-
-        Nodo<Tipo>* actual = primero;
-
+    int cantidadNodos() const {
+        if (estaVacia()) return 0;
+        int contador = 0;
+        Nodo* actual = cabeza;
         do {
-            std::cout << actual->dato << " ";
+            contador++;
             actual = actual->siguiente;
-        } while (actual != primero);
-
-        std::cout << std::endl;
-    }
-
-    int obtenerTamano() const {
-        return tamano;
-    }
-
-    Tipo obtenerElemento(int indice) const {
-        if (indice < 0 || indice >= tamano) {
-            throw std::out_of_range("Indice fuera de rango");
-        }
-
-        Nodo<Tipo>* actual = primero;
-        for (int i = 0; i < indice; i++) {
-            actual = actual->siguiente;
-        }
-
-        return actual->dato;
-    }
-
-    Tipo* buscarPorNumeroDeRegistro(const string& numeroDeRegistro) const {
-        if (estaVacia()) {
-            return nullptr;
-        }
-
-        Nodo<Tipo>* actual = primero;
-
-        do {
-            if (actual->dato.getNumeroRegistro() == numeroDeRegistro) {
-                return &(actual->dato);
-            }
-
-            actual = actual->siguiente;
-        } while (actual != primero);
-
-        return nullptr;
-    }
-
-    // Metodo para eliminar por numero de registro
-    void eliminarPorNumeroDeRegistro(const string& numeroDeRegistro) {
-        if (estaVacia()) {
-            return;
-        }
-
-        Nodo<Tipo>* actual = primero;
-
-        do {
-            if (actual->dato.getNumeroRegistro() == numeroDeRegistro) {
-                if (actual == primero && actual == ultimo) {
-                    primero = nullptr;
-                    ultimo = nullptr;
-                } else if (actual == primero) {
-                    primero = actual->siguiente;
-                    ultimo->siguiente = primero;
-                    primero->anterior = ultimo;
-                } else if (actual == ultimo) {
-                    ultimo = actual->anterior;
-                    ultimo->siguiente = primero;
-                    primero->anterior = ultimo;
-                } else {
-                    actual->anterior->siguiente = actual->siguiente;
-                    actual->siguiente->anterior = actual->anterior;
-                }
-
-                delete actual;
-                tamano--;
-                return;
-            }
-
-            actual = actual->siguiente;
-        } while (actual != primero);
+        } while (actual != cabeza);
+        return contador;
     }
 };
 

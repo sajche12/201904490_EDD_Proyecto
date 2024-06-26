@@ -25,15 +25,12 @@ void recomendarRuta();
 void visualizarReportes();
 PilotoBB convertirPilotoBB(const Piloto &piloto);
 void reporteArbolB();
-void reporteListaCircularDoble();
 void reporteArbolBinarioBusqueda();
 void reporteTablaHash();
-void reporteGrafoDirigido();
 void reporteMatrizDispersa();
 
 // Variables globales
-ListaCircularDoble<Avion> listaAvionesMantenimiento;
-ListaCircularDoble<Avion> listaAvionesDisponible;
+ListaCircularDoble listaAvionesMantenimiento;
 ArbolBinarioBusqueda arbolPilotos;
 ListaAdyacencia listaRutas;
 ArbolB arbolDisponible;
@@ -144,7 +141,7 @@ void cargarAviones()
         }
         else if (avionNuevo.getEstado() == "Mantenimiento")
         {
-            listaAvionesMantenimiento.insertar(avionNuevo);
+            listaAvionesMantenimiento.agregarAvion(avionNuevo);
         }
     }
     cout << "\nAviones cargados exitosamente.\n"
@@ -363,7 +360,7 @@ void visualizarReportes()
             reporteArbolB();
             break;
         case 2:
-            reporteListaCircularDoble();
+            listaAvionesMantenimiento.generarDot();
             break;
         case 3:
             reporteArbolBinarioBusqueda();
@@ -394,12 +391,6 @@ void reporteArbolB()
     //arbolDisponible.imprimir();
 }
 
-void reporteListaCircularDoble()
-{
-    cout << "Lista Circular Doble - Aviones en Mantenimiento:" << endl;
-    //listaAvionesMantenimiento.imprimir();
-}
-
 void reporteArbolBinarioBusqueda()
 {
     // Generar el contenido Graphviz del árbol de pilotos
@@ -428,12 +419,6 @@ void reporteTablaHash()
 {
     cout << "Tabla Hash - Pilotos:" << endl;
     //tablaPilotos.imprimirTabla();
-}
-
-void reporteGrafoDirigido()
-{
-    cout << "Grafo Dirigido - Rutas:" << endl;
-    //listaRutas.imprimir();
 }
 
 void reporteMatrizDispersa()
