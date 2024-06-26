@@ -1,0 +1,13 @@
+digraph G {
+"P12345678" [label="John Doe\nHoras de vuelo: 600"];
+"P12345678" -> "P98765432";
+"P98765432" [label="Jane Smith\nHoras de vuelo: 100"];
+"P98765432" -> "P6521495";
+"P6521495" [label="Pablo Solis\nHoras de vuelo: 85"];
+"P98765432" -> "P05485571";
+"P05485571" [label="Ximena Perez\nHoras de vuelo: 250"];
+"P12345678" -> "P47521458";
+"P47521458" [label="Luis Morales\nHoras de vuelo: 750"];
+"P47521458" -> "P32004957";
+"P32004957" [label="Andrea Aguilar\nHoras de vuelo: 700"];
+}

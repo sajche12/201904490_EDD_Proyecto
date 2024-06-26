@@ -1,0 +1,9 @@
+digraph G {
+    "Cadiz" -> "Sevilla" [label="125"];
+    "Sevilla" -> "Cadiz" [label="125"];
+    "Sevilla" -> "Granada" [label="256"];
+    "Sevilla" -> "Jaen" [label="242"];
+    "Granada" -> "Sevilla" [label="256"];
+    "Granada" -> "Jaen" [label="99"];
+    "Jaen" -> "Sevilla" [label="242"];
+}
