@@ -18,7 +18,7 @@
 	{
 		"nombre": "Luis Morales",
 		"nacionalidad": "México",
-		"numero_de_id": "P47521458",
+		"numero_de_id": "A01010104",
 		"vuelo": "A102",
 		"horas_de_vuelo": 750,
 		"tipo_de_licencia": "DFG"
@@ -26,7 +26,7 @@
 	{
 		"nombre": "Pablo Solis",
 		"nacionalidad": "Guatemala",
-		"numero_de_id": "P6521495",
+		"numero_de_id": "P14521378",
 		"vuelo": "A105",
 		"horas_de_vuelo": 85,
 		"tipo_de_licencia": "PUI"
@@ -34,7 +34,7 @@
 	{
 		"nombre": "Ximena Perez",
 		"nacionalidad": "Costa Rica",
-		"numero_de_id": "P05485571",
+		"numero_de_id": "P10101019",
 		"vuelo": "A202",
 		"horas_de_vuelo": 250,
 		"tipo_de_licencia": "QWE"
@@ -42,7 +42,7 @@
 	{
 		"nombre": "Andrea Aguilar",
 		"nacionalidad": "España",
-		"numero_de_id": "P32004957",
+		"numero_de_id": "P87654321",
 		"vuelo": "A205",
 		"horas_de_vuelo": 700,
 		"tipo_de_licencia": "BHF"

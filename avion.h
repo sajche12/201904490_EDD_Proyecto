@@ -35,6 +35,11 @@ public:
         return ciudad_destino;}
     std::string getEstado() const {
         return estado;}
+    
+    // Operador de comparación
+    bool operator<(const Avion& otro) const {
+        return numero_de_registro < otro.numero_de_registro;
+    }
 
 };    
 #endif // AVION_H 

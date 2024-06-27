@@ -70,5 +70,50 @@
 		"aerolinea": "AirlineC",
 		"ciudad_destino": "Costa Rica",
 		"estado": "Mantenimiento"
+	},
+	{
+		"vuelo": "A108",
+		"numero_de_registro": "N95625",
+		"modelo": "Boeing 222",
+		"capacidad": 275,
+		"aerolinea": "AirlineD",
+		"ciudad_destino": "El Salvador",
+		"estado": "Disponible"
+	},
+	{
+		"vuelo": "A109",
+		"numero_de_registro": "N14527",
+		"modelo": "Boeing 365",
+		"capacidad": 100,
+		"aerolinea": "AirlineE",
+		"ciudad_destino": "Grecia",
+		"estado": "Disponible"
+	},
+	{
+		"vuelo": "A110",
+		"numero_de_registro": "N48745",
+		"modelo": "Boeing 100",
+		"capacidad": 360,
+		"aerolinea": "AirlineF",
+		"ciudad_destino": "Panama",
+		"estado": "Disponible"
+	},
+	{
+		"vuelo": "A111",
+		"numero_de_registro": "N98552",
+		"modelo": "Boeing 748",
+		"capacidad": 450,
+		"aerolinea": "AirlineG",
+		"ciudad_destino": "Inglaterra",
+		"estado": "Disponible"
+	},
+	{
+		"vuelo": "A112",
+		"numero_de_registro": "N99854",
+		"modelo": "Boeing 200",
+		"capacidad": 145,
+		"aerolinea": "AirlineH",
+		"ciudad_destino": "Suiza",
+		"estado": "Disponible"
 	}
 ]

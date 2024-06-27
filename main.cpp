@@ -34,7 +34,6 @@ ListaCircularDoble listaAvionesMantenimiento;
 ArbolBinarioBusqueda arbolPilotos;
 ListaAdyacencia listaRutas;
 ArbolB arbolDisponible;
-Vuelo vueloNuevo;
 TablaHash tablaPilotos(18);
 
 // Funcion principal
@@ -129,15 +128,10 @@ void cargarAviones()
         Avion avionNuevo(avion["vuelo"].asString(), avion["numero_de_registro"].asString(), avion["modelo"].asString(), avion["capacidad"].asInt(), avion["aerolinea"].asString(), avion["ciudad_destino"].asString(), avion["estado"].asString());
 
         // Agregar el avión avionNuevo a la lista de aviones verificando su estado
-        if (avionNuevo.getEstado() == "Disponible")
-        {
-            strcpy(vueloNuevo.vuelo, avionNuevo.getVuelo().c_str());
-            strcpy(vueloNuevo.numero_de_registro, avionNuevo.getNumeroDeRegistro().c_str());
-            strcpy(vueloNuevo.modelo, avionNuevo.getModelo().c_str());
-            vueloNuevo.capacidad = avionNuevo.getCapacidad();
-            strcpy(vueloNuevo.aerolinea, avionNuevo.getAerolinea().c_str());
-            strcpy(vueloNuevo.ciudad_destino, avionNuevo.getCiudadDestino().c_str());
-            arbolDisponible.insertar(vueloNuevo);
+        if (avionNuevo.getEstado() == "Disponible") {
+            Avion* avionNuevoDisponible = new Avion(avion["vuelo"].asString(), avion["numero_de_registro"].asString(), avion["modelo"].asString(), avion["capacidad"].asInt(), avion["aerolinea"].asString(), avion["ciudad_destino"].asString(), avion["estado"].asString());
+            
+            arbolDisponible.insertar(avionNuevoDisponible);
         }
         else if (avionNuevo.getEstado() == "Mantenimiento")
         {
@@ -357,7 +351,7 @@ void visualizarReportes()
         switch (opcion)
         {
         case 1:
-            reporteArbolB();
+            arbolDisponible.generarVisualizacion();
             break;
         case 2:
             listaAvionesMantenimiento.generarDot();
@@ -366,7 +360,7 @@ void visualizarReportes()
             reporteArbolBinarioBusqueda();
             break;
         case 4:
-            reporteTablaHash();
+            tablaPilotos.visualizarTablaComoString();
             break;
         case 5: 
             listaRutas.generarGrafoGraphviz();

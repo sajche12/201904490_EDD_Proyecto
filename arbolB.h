@@ -2,135 +2,205 @@
 #define ARBOLB_H
 
 #include <iostream>
-#include <cstring>
+#include <string>
+#include "avion.h" // Asumimos que este archivo ya existe
 
-const int GRADO = 5; // Grado del árbol B
+const int ORDEN = 5;
+const int MAX_CLAVES = ORDEN - 1;
+const int MAX_HIJOS = ORDEN;
 
-struct Vuelo {
-    char vuelo[10];
-    char numero_de_registro[10];
-    char modelo[20];
-    int capacidad;
-    char aerolinea[20];
-    char ciudad_destino[20];
-    char estado[15];
-
-    Vuelo() {
-        strcpy(estado, "Mantenimiento");
-    }
-};
-
-struct NodoB {
-    Vuelo llaves[GRADO - 1];
-    NodoB* hijos[GRADO];
-    int num_llaves;
-    bool hoja;
+class NodoB {
+public:
+    Avion* claves[MAX_CLAVES];
+    NodoB* hijos[MAX_HIJOS];
+    int numClaves;
+    bool esHoja;
 
     NodoB() {
-        num_llaves = 0;
-        hoja = true;
-        for (int i = 0; i < GRADO; i++) {
+        for (int i = 0; i < MAX_CLAVES; i++) {
+            claves[i] = nullptr;
+        }
+        for (int i = 0; i < MAX_HIJOS; i++) {
             hijos[i] = nullptr;
+        }
+        numClaves = 0;
+        esHoja = true;
+    }
+
+    ~NodoB() {
+        for (int i = 0; i < numClaves; i++) {
+            delete claves[i];
+        }
+        if (!esHoja) {
+            for (int i = 0; i <= numClaves; i++) {
+                delete hijos[i];
+            }
         }
     }
 };
 
 class ArbolB {
+private:
+    NodoB* raiz;
+
+    void dividirHijo(NodoB* padre, int indice, NodoB* hijo) {
+        NodoB* nuevoNodo = new NodoB();
+        nuevoNodo->esHoja = hijo->esHoja;
+        nuevoNodo->numClaves = MAX_CLAVES / 2;
+
+        for (int j = 0; j < MAX_CLAVES / 2; j++) {
+            nuevoNodo->claves[j] = hijo->claves[j + MAX_CLAVES / 2 + 1];
+        }
+
+        if (!hijo->esHoja) {
+            for (int j = 0; j < MAX_HIJOS / 2; j++) {
+                nuevoNodo->hijos[j] = hijo->hijos[j + MAX_HIJOS / 2];
+            }
+        }
+
+        hijo->numClaves = MAX_CLAVES / 2;
+
+        for (int j = padre->numClaves; j >= indice + 1; j--) {
+            padre->hijos[j + 1] = padre->hijos[j];
+        }
+
+        padre->hijos[indice + 1] = nuevoNodo;
+
+        for (int j = padre->numClaves - 1; j >= indice; j--) {
+            padre->claves[j + 1] = padre->claves[j];
+        }
+
+        padre->claves[indice] = hijo->claves[MAX_CLAVES / 2];
+        padre->numClaves++;
+    }
+
+    void insertarNoLleno(NodoB* nodo, Avion* avion) {
+        int i = nodo->numClaves - 1;
+
+        if (nodo->esHoja) {
+            while (i >= 0 && avion->getNumeroDeRegistro() < nodo->claves[i]->getNumeroDeRegistro()) {
+                nodo->claves[i + 1] = nodo->claves[i];
+                i--;
+            }
+
+            nodo->claves[i + 1] = avion;
+            nodo->numClaves++;
+        } else {
+            while (i >= 0 && avion->getNumeroDeRegistro() < nodo->claves[i]->getNumeroDeRegistro()) {
+                i--;
+            }
+
+            i++;
+
+            if (nodo->hijos[i]->numClaves == MAX_CLAVES) {
+                dividirHijo(nodo, i, nodo->hijos[i]);
+
+                if (avion->getNumeroDeRegistro() > nodo->claves[i]->getNumeroDeRegistro()) {
+                    i++;
+                }
+            }
+            insertarNoLleno(nodo->hijos[i], avion);
+        }
+    }
+
+    void generarDotRecursivo(NodoB* nodo, std::ofstream& archivo, int& contadorNodos) {
+        if (!nodo) return;
+
+        int idNodoActual = contadorNodos++;
+
+        std::stringstream contenidoNodo;
+        contenidoNodo << "Nodo" << idNodoActual << " [label=\"";
+        for (int i = 0; i < nodo->numClaves; i++) {
+            if (i > 0) contenidoNodo << "|";
+            contenidoNodo << nodo->claves[i]->getNumeroDeRegistro();
+        }
+        contenidoNodo << "\"];\n";
+        archivo << contenidoNodo.str();
+
+        if (!nodo->esHoja) {
+            for (int i = 0; i <= nodo->numClaves; i++) {
+                int idHijo = contadorNodos;
+                generarDotRecursivo(nodo->hijos[i], archivo, contadorNodos);
+                archivo << "Nodo" << idNodoActual << " -> Nodo" << idHijo << ";\n";
+            }
+        }
+    }
+
 public:
     ArbolB() {
         raiz = new NodoB();
     }
 
-    void insertar(const Vuelo& vuelo) {
-        NodoB* r = raiz;
-        if (r->num_llaves == GRADO - 1) {
-            NodoB* s = new NodoB();
-            raiz = s;
-            s->hoja = false;
-            s->hijos[0] = r;
-            dividirHijo(s, 0, r);
-            insertarNoLleno(s, vuelo);
-        } else {
-            insertarNoLleno(r, vuelo);
+    ~ArbolB() {
+        if (raiz) {
+            delete raiz;
         }
     }
 
-    void imprimir() {
-        imprimir(raiz, 0);
+    void insertar(Avion* avion) {
+        if (!avion) {
+            throw std::invalid_argument("No se puede insertar un avión nulo");
+        }
+
+        if (!raiz) {
+            raiz = new NodoB();
+        }
+
+        if (raiz->numClaves == MAX_CLAVES) {
+            NodoB* nuevoNodo = new NodoB();
+            nuevoNodo->esHoja = false;
+            nuevoNodo->hijos[0] = raiz;
+            dividirHijo(nuevoNodo, 0, raiz);
+            insertarNoLleno(nuevoNodo, avion);
+            raiz = nuevoNodo;
+        } else {
+            insertarNoLleno(raiz, avion);
+        }
+    }
+
+    Avion* buscar(const std::string& numero_de_registro) {
+        if (numero_de_registro.empty()) {
+            throw std::invalid_argument("El número de registro no puede estar vacío");
+        }
+        return buscarRecursivo(raiz, numero_de_registro);
+    }
+
+    void generarVisualizacion() {
+        std::ofstream archivo("arbolB.dot");
+        if (!archivo.is_open()) {
+            throw std::runtime_error("No se pudo abrir el archivo para escribir");
+        }
+
+        archivo << "digraph ArbolB {\n";
+        archivo << "node [shape=record];\n";
+
+        int contadorNodos = 0;
+        generarDotRecursivo(raiz, archivo, contadorNodos);
+
+        archivo << "}\n";
+        archivo.close();
+
+        system("dot -Tpng arbolB.dot -o arbolB.png");
+        system("arbolB.png");
+
     }
 
 private:
-    NodoB* raiz;
-
-    void dividirHijo(NodoB* x, int i, NodoB* y) {
-        NodoB* z = new NodoB();
-        z->hoja = y->hoja;
-        z->num_llaves = (GRADO / 2) - 1;
-
-        for (int j = 0; j < (GRADO / 2) - 1; j++) {
-            z->llaves[j] = y->llaves[j + (GRADO / 2)];
-        }
-
-        if (!y->hoja) {
-            for (int j = 0; j < GRADO / 2; j++) {
-                z->hijos[j] = y->hijos[j + (GRADO / 2)];
-            }
-        }
-
-        y->num_llaves = (GRADO / 2) - 1;
-
-        for (int j = x->num_llaves; j >= i + 1; j--) {
-            x->hijos[j + 1] = x->hijos[j];
-        }
-
-        x->hijos[i + 1] = z;
-
-        for (int j = x->num_llaves - 1; j >= i; j--) {
-            x->llaves[j + 1] = x->llaves[j];
-        }
-
-        x->llaves[i] = y->llaves[(GRADO / 2) - 1];
-        x->num_llaves++;
-    }
-
-    void insertarNoLleno(NodoB* x, const Vuelo& vuelo) {
-        int i = x->num_llaves - 1;
-        if (x->hoja) {
-            while (i >= 0 && strcmp(vuelo.numero_de_registro, x->llaves[i].numero_de_registro) < 0) {
-                x->llaves[i + 1] = x->llaves[i];
-                i--;
-            }
-            x->llaves[i + 1] = vuelo;
-            x->num_llaves++;
-        } else {
-            while (i >= 0 && strcmp(vuelo.numero_de_registro, x->llaves[i].numero_de_registro) < 0) {
-                i--;
-            }
+    Avion* buscarRecursivo(NodoB* nodo, const std::string& numero_de_registro) {
+        int i = 0;
+        while (i < nodo->numClaves && numero_de_registro > nodo->claves[i]->getNumeroDeRegistro()) {
             i++;
-            if (x->hijos[i]->num_llaves == GRADO - 1) {
-                dividirHijo(x, i, x->hijos[i]);
-                if (strcmp(vuelo.numero_de_registro, x->llaves[i].numero_de_registro) > 0) {
-                    i++;
-                }
-            }
-            insertarNoLleno(x->hijos[i], vuelo);
         }
-    }
 
-    void imprimir(NodoB* nodo, int nivel) {
-        if (nodo != nullptr) {
-            for (int i = 0; i < nodo->num_llaves; i++) {
-                for (int j = 0; j < nivel; j++) {
-                    std::cout << "    ";
-                }
-                std::cout << nodo->llaves[i].numero_de_registro << " " << nodo->llaves[i].vuelo << " " << nodo->llaves[i].modelo << " " << nodo->llaves[i].capacidad << " " << nodo->llaves[i].aerolinea << " " << nodo->llaves[i].ciudad_destino << " " << nodo->llaves[i].estado << std::endl;
-            }
-            if (!nodo->hoja) {
-                for (int i = 0; i <= nodo->num_llaves; i++) {
-                    imprimir(nodo->hijos[i], nivel + 1);
-                }
-            }
+        if (i < nodo->numClaves && numero_de_registro == nodo->claves[i]->getNumeroDeRegistro()) {
+            return nodo->claves[i];
         }
+
+        if (nodo->esHoja) {
+            return nullptr;
+        }
+
+        return buscarRecursivo(nodo->hijos[i], numero_de_registro);
     }
 };
 

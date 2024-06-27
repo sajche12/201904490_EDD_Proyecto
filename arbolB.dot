@@ -1,0 +1,4 @@
+digraph ArbolB {
+node [shape=record];
+Nodo0 [label="N12345|N58426|N75482"];
+}

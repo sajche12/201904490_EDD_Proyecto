@@ -3,7 +3,6 @@
 
 #include <iostream>
 #include "piloto.h"
-#include "graphviz/gvc.h"
 
 using namespace std;
 
@@ -102,38 +101,37 @@ public:
         }
     }
 
-    void TablaHash::visualizarTabla() {
-        GVC_t *gvc = gvContext();
-        Agraph_t *g = agopen("TablaHash", Agdirected, 0);
+    void visualizarTablaComoString() {
+    string dotGraph = "digraph TablaHash {\n";
+    dotGraph += "rankdir=LR;\n"; // Cambio aquí para orientación de izquierda a derecha
+    dotGraph += "node [shape=box];\n"; // Estilo global para los nodos
 
-        // Estilos para los nodos y aristas
-        agattr(g, AGNODE, "shape", "box");
-        agattr(g, AGEDGE, "color", "blue");
+    for (int i = 0; i < M; ++i) {
+        dotGraph += to_string(i) + " [label=\"" + to_string(i) + "\"];\n";
 
-        for (int i = 0; i < M; ++i) {
-            char indice[10];
-            sprintf(indice, "Indice %d", i);
-            Agnode_t *nodoIndice = agnode(g, indice, 1);
-
-            Piloto* actual = tabla[i];
-            Agnode_t *nodoAnterior = nodoIndice;
-            while (actual != nullptr) {
-                char idPiloto[50];
-                sprintf(idPiloto, "%s", actual->numero_de_id.c_str());
-                Agnode_t *nodoPiloto = agnode(g, idPiloto, 1);
-                agedge(g, nodoAnterior, nodoPiloto, 0, 1);
-                nodoAnterior = nodoPiloto;
-                actual = actual->siguiente;
-            }
+        Piloto* actual = tabla[i];
+        string nodoAnterior = to_string(i);
+        while (actual != nullptr) {
+            string idPiloto = actual->numero_de_id;
+            dotGraph += idPiloto + " [label=\"" + idPiloto + "\"];\n";
+            dotGraph += nodoAnterior + " -> " + idPiloto + ";\n";
+            nodoAnterior = idPiloto;
+            actual = actual->siguiente;
         }
+    }
 
-        gvLayout(gvc, g, "dot");
-        gvRenderFilename(gvc, g, "png", "tabla_hash_visualizacion.png");
-        gvFreeLayout(gvc, g);
-        agclose(g);
-        gvFreeContext(gvc);
+    dotGraph += "}\n";
 
-        cout << "Visualización generada en 'tabla_hash_visualizacion.png'." << endl;
+    // Opcional: Guardar dotGraph en un archivo
+    std::ofstream outFile("tabla_hash_visualizacion.dot");
+    if (outFile.is_open()) {
+        outFile << dotGraph;
+        outFile.close();
+    }
+
+    system("dot -Tpng -o tabla_hash_visualizacion.png tabla_hash_visualizacion.dot");
+
+    system("start tabla_hash_visualizacion.png");
     }
 };
 
