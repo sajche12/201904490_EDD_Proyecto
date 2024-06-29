@@ -116,6 +116,57 @@ public:
         } while (actual != cabeza);
         return contador;
     }
+
+    void eliminarPorNumeroDeRegistro(const string& numeroDeRegistro) {
+        if (estaVacia()) return; // Si la lista está vacía, no hay nada que eliminar.
+
+        Nodo* actual = cabeza;
+        Nodo* aEliminar = nullptr;
+
+        // Buscar el nodo a eliminar.
+        do {
+            if (actual->avion.getNumeroDeRegistro() == numeroDeRegistro) {
+                aEliminar = actual;
+                break;
+            }
+            actual = actual->siguiente;
+        } while (actual != cabeza);
+
+        if (aEliminar == nullptr) return; // Si no se encontró, no hay nada que hacer.
+
+        // Si el nodo a eliminar es el único nodo en la lista.
+        if (aEliminar->siguiente == aEliminar) {
+            cabeza = cola = nullptr;
+        } else {
+            // Si hay más de un nodo en la lista.
+            aEliminar->anterior->siguiente = aEliminar->siguiente;
+            aEliminar->siguiente->anterior = aEliminar->anterior;
+
+            // Si el nodo a eliminar es la cabeza o la cola, actualizarlos.
+            if (aEliminar == cabeza) {
+                cabeza = aEliminar->siguiente;
+            }
+            if (aEliminar == cola) {
+                cola = aEliminar->anterior;
+            }
+        }
+
+        delete aEliminar; // Liberar la memoria del nodo eliminado.
+    }
+
+    Avion* obtenerPorNumeroDeRegistro(const string& numeroDeRegistro) {
+        if (estaVacia()) return nullptr; // Si la lista está vacía, no hay aviones que retornar.
+
+        Nodo* actual = cabeza;
+        do {
+            if (actual->avion.getNumeroDeRegistro() == numeroDeRegistro) {
+                return &(actual->avion); // Retorna la dirección del avión encontrado.
+            }
+            actual = actual->siguiente;
+        } while (actual != cabeza);
+
+        return nullptr; // Si no se encuentra el avión, retorna nullptr.
+    }
 };
 
 #endif // LISTA_CIRCULAR_DOBLE_H

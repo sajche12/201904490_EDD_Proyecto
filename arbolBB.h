@@ -97,50 +97,60 @@ private:
     }
 
     // Método auxiliar para encontrar el sucesor inorden (el nodo más pequeño en el subárbol derecho)
-    NodoBB* minimoNodo(NodoBB* nodo) {
-        NodoBB* actual = nodo;
-        while (actual && actual->izquierdo != nullptr) {
-            actual = actual->izquierdo;
+    NodoBB* eliminarNodoPorID(NodoBB* nodo, const std::string& numero_de_id) {
+        if (nodo == nullptr) {
+            return nullptr;
         }
-        return actual;
-    }
 
-    // Método auxiliar para eliminar un nodo
-    NodoBB* eliminarNodo(NodoBB* raiz, const std::string& numero_de_id) {
-        if (raiz == nullptr) return raiz;
+        // Si encontramos el nodo con el ID correcto
+        if (nodo->datos.numero_de_id == numero_de_id) {
+            // Caso 1: Nodo hoja (sin hijos)
+            if (nodo->izquierdo == nullptr && nodo->derecho == nullptr) {
+                delete nodo;
+                return nullptr;
+            }
+            // Caso 2: Nodo con un hijo
+            else if (nodo->izquierdo == nullptr) {
+                NodoBB* temp = nodo->derecho;
+                delete nodo;
+                return temp;
+            }
+            else if (nodo->derecho == nullptr) {
+                NodoBB* temp = nodo->izquierdo;
+                delete nodo;
+                return temp;
+            }
+            // Caso 3: Nodo con dos hijos
+            else {
+                // Encontrar el sucesor inorden (el nodo más a la izquierda en el subárbol derecho)
+                NodoBB* sucesor = nodo->derecho;
+                NodoBB* padreSuccessor = nodo;
+                while (sucesor->izquierdo != nullptr) {
+                    padreSuccessor = sucesor;
+                    sucesor = sucesor->izquierdo;
+                }
 
-        // Si el numero_de_id es menor que el del raiz, está en el subárbol izquierdo
-        if (numero_de_id < raiz->datos.numero_de_id) {
-            raiz->izquierdo = eliminarNodo(raiz->izquierdo, numero_de_id);
+                // Copiar los datos del sucesor al nodo actual
+                nodo->datos = sucesor->datos;
+
+                // Eliminar el sucesor
+                if (padreSuccessor == nodo) {
+                    nodo->derecho = sucesor->derecho;
+                } else {
+                    padreSuccessor->izquierdo = sucesor->derecho;
+                }
+
+                delete sucesor;
+                return nodo;
+            }
         }
-        // Si el numero_de_id es mayor que el del raiz, está en el subárbol derecho
-        else if (numero_de_id > raiz->datos.numero_de_id) {
-            raiz->derecho = eliminarNodo(raiz->derecho, numero_de_id);
-        }
-        // Si el numero_de_id es igual al del nodo actual, este es el nodo a eliminar
+        // Si no es el nodo que buscamos, continuamos la búsqueda en ambos subárboles
         else {
-            // Nodo con solo un hijo o sin hijos
-            if (raiz->izquierdo == nullptr) {
-                NodoBB* temp = raiz->derecho;
-                delete raiz;
-                return temp;
-            }
-            else if (raiz->derecho == nullptr) {
-                NodoBB* temp = raiz->izquierdo;
-                delete raiz;
-                return temp;
-            }
-
-            // Nodo con dos hijos: Obtener el sucesor inorden (el menor en el subárbol derecho)
-            NodoBB* temp = minimoNodo(raiz->derecho);
-
-            // Copiar los datos del sucesor inorden al nodo actual
-            raiz->datos = temp->datos;
-
-            // Eliminar el sucesor inorden
-            raiz->derecho = eliminarNodo(raiz->derecho, temp->datos.numero_de_id);
+            nodo->izquierdo = eliminarNodoPorID(nodo->izquierdo, numero_de_id);
+            nodo->derecho = eliminarNodoPorID(nodo->derecho, numero_de_id);
         }
-        return raiz;
+
+        return nodo;
     }
 
     // Método auxiliar recursivo para generar la representación de Graphviz
@@ -161,6 +171,21 @@ private:
             }
         }
         return cadena;
+    }
+
+    // Método auxiliar privado para buscar recursivamente por número de ID
+    PilotoBB* buscarPorIDRecursivo(NodoBB* nodo, const std::string& numero_de_id) const {
+        if (nodo == nullptr) {
+            return nullptr; // No encontrado
+        }
+        if (nodo->datos.numero_de_id == numero_de_id) {
+            return &nodo->datos; // Encontrado
+        }
+        if (numero_de_id < nodo->datos.numero_de_id) {
+            return buscarPorIDRecursivo(nodo->izquierdo, numero_de_id); // Buscar en el subárbol izquierdo
+        } else {
+            return buscarPorIDRecursivo(nodo->derecho, numero_de_id); // Buscar en el subárbol derecho
+        }
     }
 
 public:
@@ -204,7 +229,7 @@ public:
 
     // Método público para eliminar un piloto por numero_de_id
     void eliminarPiloto(const std::string& numero_de_id) {
-        raiz = eliminarNodo(raiz, numero_de_id);
+        raiz = eliminarNodoPorID(raiz, numero_de_id);
     }
 
     // Método público para generar la representación de Graphviz del árbol
@@ -213,6 +238,11 @@ public:
         graphviz += generarGraphvizRecursivo(raiz);
         graphviz += "}\n";
         return graphviz;
+    }
+
+    // Método público para buscar un piloto por su número de ID
+    PilotoBB* buscarPorID(const std::string& numero_de_id) const {
+        return buscarPorIDRecursivo(raiz, numero_de_id);
     }
 };
 

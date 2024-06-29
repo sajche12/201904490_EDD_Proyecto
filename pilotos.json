@@ -35,7 +35,7 @@
 		"nombre": "Ximena Perez",
 		"nacionalidad": "Costa Rica",
 		"numero_de_id": "P10101019",
-		"vuelo": "A202",
+		"vuelo": "A654",
 		"horas_de_vuelo": 250,
 		"tipo_de_licencia": "QWE"
 	},
@@ -43,8 +43,16 @@
 		"nombre": "Andrea Aguilar",
 		"nacionalidad": "España",
 		"numero_de_id": "P87654321",
-		"vuelo": "A205",
+		"vuelo": "A107",
 		"horas_de_vuelo": 700,
 		"tipo_de_licencia": "BHF"
+	},
+	{
+		"nombre": "Marcos Perez",
+		"nacionalidad": "Inglaterra",
+		"numero_de_id": "P64875412",
+		"vuelo": "A113",
+		"horas_de_vuelo": 400,
+		"tipo_de_licencia": "LJH"
 	}
 ]

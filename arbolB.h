@@ -1,41 +1,171 @@
 #ifndef ARBOLB_H
 #define ARBOLB_H
 
+#include "avion.h"
 #include <iostream>
 #include <string>
-#include "avion.h" // Asumimos que este archivo ya existe
+
+using namespace std;
 
 const int ORDEN = 5;
-const int MAX_CLAVES = ORDEN - 1;
-const int MAX_HIJOS = ORDEN;
+
+int obtenerNumero(string numero_de_registro) {
+    return stoi(numero_de_registro.substr(1));
+}
 
 class NodoB {
 public:
-    Avion* claves[MAX_CLAVES];
-    NodoB* hijos[MAX_HIJOS];
-    int numClaves;
-    bool esHoja;
+    bool hoja;
+    int n; // Número de claves
+    Avion* aviones[ORDEN - 1];
+    NodoB* hijos[ORDEN];
 
-    NodoB() {
-        for (int i = 0; i < MAX_CLAVES; i++) {
-            claves[i] = nullptr;
-        }
-        for (int i = 0; i < MAX_HIJOS; i++) {
+    NodoB(bool _hoja) {
+        hoja = _hoja;
+        n = 0;
+        for (int i = 0; i < ORDEN; i++)
             hijos[i] = nullptr;
-        }
-        numClaves = 0;
-        esHoja = true;
     }
 
-    ~NodoB() {
-        for (int i = 0; i < numClaves; i++) {
-            delete claves[i];
+    void insertarNoLleno(Avion* avion) {
+        int num_registro = obtenerNumero(avion->getNumeroDeRegistro());
+        int i = n - 1;
+
+        if (hoja) {
+            while (i >= 0 && obtenerNumero(aviones[i]->getNumeroDeRegistro()) > num_registro) {
+                aviones[i + 1] = aviones[i];
+                i--;
+            }
+
+            aviones[i + 1] = avion;
+            n = n + 1;
+        } else {
+            while (i >= 0 && obtenerNumero(aviones[i]->getNumeroDeRegistro()) > num_registro)
+                i--;
+
+            if (hijos[i + 1]->n == ORDEN - 1) {
+                dividirHijo(i + 1, hijos[i + 1]);
+
+                if (obtenerNumero(aviones[i + 1]->getNumeroDeRegistro()) < num_registro)
+                    i++;
+            }
+            hijos[i + 1]->insertarNoLleno(avion);
         }
-        if (!esHoja) {
-            for (int i = 0; i <= numClaves; i++) {
-                delete hijos[i];
+    }
+
+    void dividirHijo(int i, NodoB* y) {
+        NodoB* z = new NodoB(y->hoja);
+        z->n = (ORDEN / 2) - 1;
+
+        for (int j = 0; j < (ORDEN / 2) - 1; j++)
+            z->aviones[j] = y->aviones[j + (ORDEN / 2)];
+
+        if (!y->hoja) {
+            for (int j = 0; j < ORDEN / 2; j++)
+                z->hijos[j] = y->hijos[j + (ORDEN / 2)];
+        }
+
+        y->n = (ORDEN / 2) - 1;
+
+        for (int j = n; j >= i + 1; j--)
+            hijos[j + 1] = hijos[j];
+
+        hijos[i + 1] = z;
+
+        for (int j = n - 1; j >= i; j--)
+            aviones[j + 1] = aviones[j];
+
+        aviones[i] = y->aviones[(ORDEN / 2) - 1];
+
+        n = n + 1;
+    }
+
+    void recorrer() {
+        int i;
+        for (i = 0; i < n; i++) {
+            if (!hoja)
+                hijos[i]->recorrer();
+            cout << " " << aviones[i]->getNumeroDeRegistro();
+        }
+
+        if (!hoja)
+            hijos[i]->recorrer();
+    }
+
+    NodoB* buscar(string numero_de_registro) {
+        int num_registro = obtenerNumero(numero_de_registro);
+        int i = 0;
+        while (i < n && obtenerNumero(aviones[i]->getNumeroDeRegistro()) < num_registro)
+            i++;
+
+        if (i < n && obtenerNumero(aviones[i]->getNumeroDeRegistro()) == num_registro)
+            return this;
+
+        if (hoja)
+            return nullptr;
+
+        return hijos[i]->buscar(numero_de_registro);
+    }
+
+    void generarDot(ofstream& archivo, int& nodoId) {
+        int miId = nodoId++;
+        archivo << "    nodo" << miId << " [label=\"";
+        for (int i = 0; i < n; i++) {
+            if (i > 0) archivo << " | ";
+            archivo << "<f" << i << "> " << aviones[i]->getNumeroDeRegistro();
+        }
+        archivo << "\"];\n";
+
+        for (int i = 0; i <= n; i++) {
+            if (hijos[i] != nullptr) {
+                int hijoId = nodoId;
+                hijos[i]->generarDot(archivo, nodoId);
+                archivo << "    nodo" << miId << ":f" << i << " -> nodo" << hijoId << ";\n";
             }
         }
+    }
+
+    void eliminarRecursivo(string numero_de_registro) {
+        int i = 0;
+        while (i < n && obtenerNumero(aviones[i]->getNumeroDeRegistro()) < obtenerNumero(numero_de_registro))
+            i++;
+        if (i < n && aviones[i]->getNumeroDeRegistro() == numero_de_registro) { // Caso 1: El avión está en este nodo
+            if (hoja) {
+                // Eliminar el avión directamente si es una hoja
+            } else {
+                // Encontrar y eliminar el predecesor/sucesor si no es una hoja
+            }
+        } else {
+            if (hoja) {
+                // El avión no está en el árbol
+                return;
+            }
+            // Descender al hijo adecuado, posiblemente después de ajustar el árbol
+            bool flag = ((i == n) ? true : false);
+            if (hijos[i]->n < (ORDEN / 2)) {
+                // Ajustar el árbol antes de descender
+            }
+            if (flag && i > n)
+                hijos[i - 1]->eliminarRecursivo(numero_de_registro);
+            else
+                hijos[i]->eliminarRecursivo(numero_de_registro);
+        }
+        // Ajustar este nodo después de la eliminación si es necesario
+    }
+
+    Avion* buscarRecursivo(string numeroRegistro) {
+        int num_registro = obtenerNumero(numeroRegistro);
+        int i = 0;
+        while (i < n && obtenerNumero(aviones[i]->getNumeroDeRegistro()) < num_registro)
+            i++;
+
+        if (i < n && obtenerNumero(aviones[i]->getNumeroDeRegistro()) == num_registro)
+            return aviones[i];
+
+        if (hoja)
+            return nullptr;
+
+        return hijos[i]->buscarRecursivo(numeroRegistro);
     }
 };
 
@@ -43,164 +173,76 @@ class ArbolB {
 private:
     NodoB* raiz;
 
-    void dividirHijo(NodoB* padre, int indice, NodoB* hijo) {
-        NodoB* nuevoNodo = new NodoB();
-        nuevoNodo->esHoja = hijo->esHoja;
-        nuevoNodo->numClaves = MAX_CLAVES / 2;
-
-        for (int j = 0; j < MAX_CLAVES / 2; j++) {
-            nuevoNodo->claves[j] = hijo->claves[j + MAX_CLAVES / 2 + 1];
-        }
-
-        if (!hijo->esHoja) {
-            for (int j = 0; j < MAX_HIJOS / 2; j++) {
-                nuevoNodo->hijos[j] = hijo->hijos[j + MAX_HIJOS / 2];
-            }
-        }
-
-        hijo->numClaves = MAX_CLAVES / 2;
-
-        for (int j = padre->numClaves; j >= indice + 1; j--) {
-            padre->hijos[j + 1] = padre->hijos[j];
-        }
-
-        padre->hijos[indice + 1] = nuevoNodo;
-
-        for (int j = padre->numClaves - 1; j >= indice; j--) {
-            padre->claves[j + 1] = padre->claves[j];
-        }
-
-        padre->claves[indice] = hijo->claves[MAX_CLAVES / 2];
-        padre->numClaves++;
-    }
-
-    void insertarNoLleno(NodoB* nodo, Avion* avion) {
-        int i = nodo->numClaves - 1;
-
-        if (nodo->esHoja) {
-            while (i >= 0 && avion->getNumeroDeRegistro() < nodo->claves[i]->getNumeroDeRegistro()) {
-                nodo->claves[i + 1] = nodo->claves[i];
-                i--;
-            }
-
-            nodo->claves[i + 1] = avion;
-            nodo->numClaves++;
-        } else {
-            while (i >= 0 && avion->getNumeroDeRegistro() < nodo->claves[i]->getNumeroDeRegistro()) {
-                i--;
-            }
-
-            i++;
-
-            if (nodo->hijos[i]->numClaves == MAX_CLAVES) {
-                dividirHijo(nodo, i, nodo->hijos[i]);
-
-                if (avion->getNumeroDeRegistro() > nodo->claves[i]->getNumeroDeRegistro()) {
-                    i++;
-                }
-            }
-            insertarNoLleno(nodo->hijos[i], avion);
-        }
-    }
-
-    void generarDotRecursivo(NodoB* nodo, std::ofstream& archivo, int& contadorNodos) {
-        if (!nodo) return;
-
-        int idNodoActual = contadorNodos++;
-
-        std::stringstream contenidoNodo;
-        contenidoNodo << "Nodo" << idNodoActual << " [label=\"";
-        for (int i = 0; i < nodo->numClaves; i++) {
-            if (i > 0) contenidoNodo << "|";
-            contenidoNodo << nodo->claves[i]->getNumeroDeRegistro();
-        }
-        contenidoNodo << "\"];\n";
-        archivo << contenidoNodo.str();
-
-        if (!nodo->esHoja) {
-            for (int i = 0; i <= nodo->numClaves; i++) {
-                int idHijo = contadorNodos;
-                generarDotRecursivo(nodo->hijos[i], archivo, contadorNodos);
-                archivo << "Nodo" << idNodoActual << " -> Nodo" << idHijo << ";\n";
-            }
-        }
-    }
-
 public:
-    ArbolB() {
-        raiz = new NodoB();
+    ArbolB() { raiz = nullptr; }
+
+    void recorrer() {
+        if (raiz != nullptr) raiz->recorrer();
     }
 
-    ~ArbolB() {
-        if (raiz) {
-            delete raiz;
-        }
+    NodoB* buscar(string numero_de_registro) {
+        return (raiz == nullptr) ? nullptr : raiz->buscar(numero_de_registro);
     }
 
     void insertar(Avion* avion) {
-        if (!avion) {
-            throw std::invalid_argument("No se puede insertar un avión nulo");
-        }
-
-        if (!raiz) {
-            raiz = new NodoB();
-        }
-
-        if (raiz->numClaves == MAX_CLAVES) {
-            NodoB* nuevoNodo = new NodoB();
-            nuevoNodo->esHoja = false;
-            nuevoNodo->hijos[0] = raiz;
-            dividirHijo(nuevoNodo, 0, raiz);
-            insertarNoLleno(nuevoNodo, avion);
-            raiz = nuevoNodo;
+        if (raiz == nullptr) {
+            raiz = new NodoB(true);
+            raiz->aviones[0] = avion;
+            raiz->n = 1;
         } else {
-            insertarNoLleno(raiz, avion);
+            if (raiz->n == ORDEN - 1) {
+                NodoB* s = new NodoB(false);
+                s->hijos[0] = raiz;
+
+                s->dividirHijo(0, raiz);
+
+                int i = 0;
+                if (obtenerNumero(s->aviones[0]->getNumeroDeRegistro()) < obtenerNumero(avion->getNumeroDeRegistro()))
+                    i++;
+                s->hijos[i]->insertarNoLleno(avion);
+
+                raiz = s;
+            } else {
+                raiz->insertarNoLleno(avion);
+            }
         }
     }
 
-    Avion* buscar(const std::string& numero_de_registro) {
-        if (numero_de_registro.empty()) {
-            throw std::invalid_argument("El número de registro no puede estar vacío");
+    void generarDot() {
+        ofstream archivo("arbolB.dot");
+        archivo << "digraph G {\n";
+        archivo << "    node [shape=record];\n";
+
+        int nodoId = 0;
+        if (raiz != nullptr) {
+            raiz->generarDot(archivo, nodoId);
         }
-        return buscarRecursivo(raiz, numero_de_registro);
-    }
-
-    void generarVisualizacion() {
-        std::ofstream archivo("arbolB.dot");
-        if (!archivo.is_open()) {
-            throw std::runtime_error("No se pudo abrir el archivo para escribir");
-        }
-
-        archivo << "digraph ArbolB {\n";
-        archivo << "node [shape=record];\n";
-
-        int contadorNodos = 0;
-        generarDotRecursivo(raiz, archivo, contadorNodos);
 
         archivo << "}\n";
         archivo.close();
 
         system("dot -Tpng arbolB.dot -o arbolB.png");
-        system("arbolB.png");
-
     }
 
-private:
-    Avion* buscarRecursivo(NodoB* nodo, const std::string& numero_de_registro) {
-        int i = 0;
-        while (i < nodo->numClaves && numero_de_registro > nodo->claves[i]->getNumeroDeRegistro()) {
-            i++;
+    void eliminar(string numero_de_registro) {
+        if (raiz != nullptr) {
+            raiz->eliminarRecursivo(numero_de_registro);
+            if (raiz->n == 0) { // Si la raíz está vacía
+                NodoB* tmp = raiz;
+                if (raiz->hoja)
+                    raiz = nullptr;
+                else
+                    raiz = raiz->hijos[0];
+                delete tmp;
+            }
         }
+    }
 
-        if (i < nodo->numClaves && numero_de_registro == nodo->claves[i]->getNumeroDeRegistro()) {
-            return nodo->claves[i];
-        }
-
-        if (nodo->esHoja) {
+    Avion* buscarAvion(string numeroRegistro) {
+        if (raiz == nullptr)
             return nullptr;
-        }
-
-        return buscarRecursivo(nodo->hijos[i], numero_de_registro);
+        else
+            return raiz->buscarRecursivo(numeroRegistro);
     }
 };
 

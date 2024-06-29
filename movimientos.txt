@@ -1,4 +1,4 @@
 MantenimientoAviones,Ingreso,N12345;
-MantinimientoAviones,Salida,N13579;
-DarDeBaja(P12345678);
+MantenimientoAviones,Salida,N67890;
+DarDeBaja(A01010104);
 DarDeBaja(P98765432);

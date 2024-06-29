@@ -1,0 +1,54 @@
+digraph G {
+node [ shape = box ];
+matriz [label="", group = filas ];
+U1[label = "A100" , group = filas ];
+U2[label = "A105" , group = filas ];
+U3[label = "A107" , group = filas ];
+U4[label = "A113" , group = filas ];
+matriz -> U1 [dir=both] ;
+U1 -> U2 [dir=both]  ;  
+U2 -> U3 [dir=both]  ;  
+U3 -> U4 [dir=both]  ;  
+A2[label = "Ciudad de Mexico" , group = 2 ];
+A3[label = "Costa Rica" , group = 3 ];
+A1[label = "Madrid" , group = 1 ];
+A4[label = "Suecia" , group = 4 ];
+matriz -> A1 [dir=both] ;
+A1 -> A2 [dir=both] ;
+A2 -> A3 [dir=both] ;
+A3 -> A4 [dir=both] ;
+{ rank = same; matriz;
+A1;
+A2;
+A3;
+A4;
+}
+X1Y1 [ label = "P12345678" style=filled group = 1 ] ;
+X2Y2 [ label = "P14521378" style=filled group = 2 ] ;
+X3Y3 [ label = "P87654321" style=filled group = 3 ] ;
+X4Y4 [ label = "P64875412" style=filled group = 4 ] ;
+U1 -> X1Y1 ;
+X1Y1 -> U1 ;
+U2 -> X2Y2 ;
+X2Y2 -> U2 ;
+U3 -> X3Y3 ;
+X3Y3 -> U3 ;
+U4 -> X4Y4 ;
+X4Y4 -> U4 ;
+A1 -> X1Y1 ;
+X1Y1 -> A1 ;
+A2 -> X2Y2 ;
+X2Y2 -> A2 ;
+A3 -> X3Y3 ;
+X3Y3 -> A3 ;
+A4 -> X4Y4 ;
+X4Y4 -> A4 ;
+{rank = same ; U1 ;
+X1Y1 ;}
+{rank = same ; U2 ;
+X2Y2 ;}
+{rank = same ; U3 ;
+X3Y3 ;}
+{rank = same ; U4 ;
+X4Y4 ;}
+}

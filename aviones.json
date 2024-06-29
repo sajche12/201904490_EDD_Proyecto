@@ -115,5 +115,23 @@
 		"aerolinea": "AirlineH",
 		"ciudad_destino": "Suiza",
 		"estado": "Disponible"
+	},
+	{
+		"vuelo": "A113",
+		"numero_de_registro": "N28455",
+		"modelo": "Boeing 130",
+		"capacidad": 295,
+		"aerolinea": "AirlineI",
+		"ciudad_destino": "Suecia",
+		"estado": "Disponible"
+	},
+	{
+		"vuelo": "A114",
+		"numero_de_registro": "N35874",
+		"modelo": "Boeing 135",
+		"capacidad": 845,
+		"aerolinea": "AirlineJ",
+		"ciudad_destino": "España",
+		"estado": "Disponible"
 	}
 ]

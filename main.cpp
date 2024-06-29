@@ -12,6 +12,7 @@
 #include "listaAdyacencia.h"
 #include "ruta.h"
 #include "tablaHash.h"
+#include "matrizDispersa.h"
 
 using namespace std;
 
@@ -24,9 +25,7 @@ void consultarHorasVuelo();
 void recomendarRuta();
 void visualizarReportes();
 PilotoBB convertirPilotoBB(const Piloto &piloto);
-void reporteArbolB();
 void reporteArbolBinarioBusqueda();
-void reporteTablaHash();
 void reporteMatrizDispersa();
 
 // Variables globales
@@ -35,6 +34,7 @@ ArbolBinarioBusqueda arbolPilotos;
 ListaAdyacencia listaRutas;
 ArbolB arbolDisponible;
 TablaHash tablaPilotos(18);
+MatrizDispersa matrizVuelosCiudades;
 
 // Funcion principal
 int main()
@@ -129,17 +129,21 @@ void cargarAviones()
 
         // Agregar el avión avionNuevo a la lista de aviones verificando su estado
         if (avionNuevo.getEstado() == "Disponible") {
+            
             Avion* avionNuevoDisponible = new Avion(avion["vuelo"].asString(), avion["numero_de_registro"].asString(), avion["modelo"].asString(), avion["capacidad"].asInt(), avion["aerolinea"].asString(), avion["ciudad_destino"].asString(), avion["estado"].asString());
             
             arbolDisponible.insertar(avionNuevoDisponible);
+            matrizVuelosCiudades.insertarAvion(avionNuevo);
+            
         }
         else if (avionNuevo.getEstado() == "Mantenimiento")
         {
+            Avion* avionNuevoMantenimiento = new Avion(avion["vuelo"].asString(), avion["numero_de_registro"].asString(), avion["modelo"].asString(), avion["capacidad"].asInt(), avion["aerolinea"].asString(), avion["ciudad_destino"].asString(), avion["estado"].asString());
             listaAvionesMantenimiento.agregarAvion(avionNuevo);
+            matrizVuelosCiudades.insertarAvion(avionNuevo);
         }
     }
-    cout << "\nAviones cargados exitosamente.\n"
-        << endl;
+    cout << "\nAviones cargados exitosamente.\n" << endl;
 }
 
 void cargarPilotos()
@@ -191,6 +195,7 @@ void cargarPilotos()
         PilotoBB pilotoNuevoBB = convertirPilotoBB(pilotoNuevo);
         arbolPilotos.insertar(pilotoNuevoBB);
         tablaPilotos.insertar(pilotoNuevoPtr);
+        matrizVuelosCiudades.insertarPiloto(pilotoNuevo);
     }
 
     cout << "\nPilotos cargados exitosamente.\n"
@@ -243,9 +248,42 @@ void cargarMovimientos() {
     if (file.is_open()) {
         cout << "\nMovimientos realizados:" << endl;
         while (getline(file, linea)) {
-            
+            // Buscar el texto "MantenimientoAviones,Ingreso,"
+            if (linea.find("MantenimientoAviones,Ingreso,") != string::npos) {
+                // Extraer el número de registro del avión entre la , y el ;
+                string ingreso = linea.substr(linea.find(",") + 8 + 1, linea.find(";") - linea.find(",") - 9);
+                // Buscar el avion en el arbol de aviones disponibles e ingresarlo a la lista de mantenimiento
+                Avion* avion = arbolDisponible.buscarAvion(ingreso);
+                if (avion != nullptr) {
+                    Avion* avionNuevo = new Avion(avion->getVuelo(), avion->getNumeroDeRegistro(), avion->getModelo(), avion->getCapacidad(), avion->getAerolinea(), avion->getCiudadDestino(), "Mantenimiento");
+                    listaAvionesMantenimiento.agregarAvion(*avionNuevo);
+                    arbolDisponible.eliminar(ingreso);
+                }
+                cout << "El avion con numero de registro " << ingreso << " ha ingresado a mantenimiento" << endl;
+            } else if (linea.find("MantenimientoAviones,Salida,") != string::npos) {
+                // Extraer el número de registro del avión
+                string salida = linea.substr(linea.find(",") + 8, linea.find(";") - linea.find(",") - 9 + 1);
+                // Buscar el avion en la lista de mantenimiento e ingresarlo al arbol de aviones disponibles
+                Avion* avion = listaAvionesMantenimiento.obtenerPorNumeroDeRegistro(salida);
+                if (avion != nullptr) {
+                    Avion* avionSale = new Avion(avion->getVuelo(), avion->getNumeroDeRegistro(), avion->getModelo(), avion->getCapacidad(), avion->getAerolinea(), avion->getCiudadDestino(), "Disponible");
+                    arbolDisponible.insertar(avionSale);
+                    listaAvionesMantenimiento.eliminarPorNumeroDeRegistro(salida);
+                }
+                cout << "El avion con numero de registro " << salida << " ha salido de mantenimiento" << endl;
+            } // Extrae el texto dentro de los parentesis de DarDeBaja();
+            else if (linea.find("DarDeBaja(") != string::npos) {
+                // Extraer el número de id del piloto
+                string numeroDeId = linea.substr(linea.find("(") + 1, linea.find(")") - linea.find("(") - 1);
+                // Buscar el piloto en la tabla hash, arbol binario y matriz dispersa y eliminarlo
+                tablaPilotos.eliminar(numeroDeId);
+                arbolPilotos.eliminarPiloto(numeroDeId);
+                matrizVuelosCiudades.eliminarPorNumeroDeID(numeroDeId);
+                cout << "El pasajero con numero de id " << numeroDeId << " ha sido dado de baja" << endl;
+            }
         }
     }
+    cout << "\nMovimientos cargados exitosamente.\n" << endl;
 }
 
 void consultarHorasVuelo()
@@ -351,7 +389,7 @@ void visualizarReportes()
         switch (opcion)
         {
         case 1:
-            arbolDisponible.generarVisualizacion();
+            arbolDisponible.generarDot();
             break;
         case 2:
             listaAvionesMantenimiento.generarDot();
@@ -366,7 +404,8 @@ void visualizarReportes()
             listaRutas.generarGrafoGraphviz();
             break;
         case 6:
-            reporteMatrizDispersa();
+            matrizVuelosCiudades.imprimirMatriz();
+            matrizVuelosCiudades.generarGraficoGraphviz();
             break;
         case 7:
             break;
@@ -377,12 +416,6 @@ void visualizarReportes()
         }
     } while (opcion != 7);
     
-}
-
-void reporteArbolB()
-{
-    cout << "Arbol B - Aviones Disponibles:" << endl;
-    //arbolDisponible.imprimir();
 }
 
 void reporteArbolBinarioBusqueda()
@@ -409,15 +442,8 @@ void reporteArbolBinarioBusqueda()
     system("arbolPilotos.png");
 }
 
-void reporteTablaHash()
-{
-    cout << "Tabla Hash - Pilotos:" << endl;
-    //tablaPilotos.imprimirTabla();
-}
-
 void reporteMatrizDispersa()
 {
     cout << "Matriz Dispersa - Vuelos y Ciudades:" << endl;
     // Implementar
 }
-

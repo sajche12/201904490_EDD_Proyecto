@@ -1,33 +1,33 @@
 digraph G {
   rankdir = LR;
-  nodo0 [label="Vuelo: A101
-Número de registro: N67890
-Modelo: Boeing 848
-Ciudad de destino: Barcelona
-Estado: Mantenimiento
-"];
-  nodo1 [label="Vuelo: A103
+  nodo0 [label="Vuelo: A103
 Número de registro: N32048
 Modelo: Airbus 920
 Ciudad de destino: New York
 Estado: Mantenimiento
 "];
-  nodo2 [label="Vuelo: A105
+  nodo1 [label="Vuelo: A105
 Número de registro: N05784
 Modelo: Boeing 136
 Ciudad de destino: Ciudad de Mexico
 Estado: Mantenimiento
 "];
-  nodo3 [label="Vuelo: A106
+  nodo2 [label="Vuelo: A106
 Número de registro: N75144
 Modelo: Boeing 025
 Ciudad de destino: Berlin
 Estado: Mantenimiento
 "];
-  nodo4 [label="Vuelo: A107
+  nodo3 [label="Vuelo: A107
 Número de registro: N66524
 Modelo: Boeing 888
 Ciudad de destino: Costa Rica
+Estado: Mantenimiento
+"];
+  nodo4 [label="Vuelo: A100
+Número de registro: N12345
+Modelo: Boeing 737
+Ciudad de destino: Madrid
 Estado: Mantenimiento
 "];
   nodo0 -> nodo1;
