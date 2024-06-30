@@ -54,5 +54,29 @@
 		"vuelo": "A113",
 		"horas_de_vuelo": 400,
 		"tipo_de_licencia": "LJH"
+	},
+	{
+		"nombre": "Luis Castillo",
+		"nacionalidad": "Italia",
+		"numero_de_id": "P48752248",
+		"vuelo": "A115",
+		"horas_de_vuelo": 755,
+		"tipo_de_licencia": "PUJ"
+	},
+	{
+		"nombre": "Carlos Solis",
+		"nacionalidad": "Haiti",
+		"numero_de_id": "P20548765",
+		"vuelo": "A108",
+		"horas_de_vuelo": 564,
+		"tipo_de_licencia": "BHY"
+	},
+	{
+		"nombre": "Maria Mercedes",
+		"nacionalidad": "Bolivia",
+		"numero_de_id": "P87552046",
+		"vuelo": "A248",
+		"horas_de_vuelo": 113,
+		"tipo_de_licencia": "UGF"
 	}
 ]

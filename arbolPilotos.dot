@@ -1,9 +1,0 @@
-digraph G {
-"P12345678" [label="John Doe\nHoras de vuelo: 600"];
-"P12345678" -> "P10101019";
-"P10101019" [label="Ximena Perez\nHoras de vuelo: 250"];
-"P10101019" -> "P14521378";
-"P14521378" [label="Pablo Solis\nHoras de vuelo: 85"];
-"P12345678" -> "A01010104";
-"A01010104" [label="Luis Morales\nHoras de vuelo: 750"];
-}

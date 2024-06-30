@@ -28,56 +28,62 @@ public:
     }
 
     void insertarNoLleno(Avion* avion) {
-        int num_registro = obtenerNumero(avion->getNumeroDeRegistro());
         int i = n - 1;
-
         if (hoja) {
-            while (i >= 0 && obtenerNumero(aviones[i]->getNumeroDeRegistro()) > num_registro) {
+            while (i >= 0 && obtenerNumero(aviones[i]->getNumeroDeRegistro()) > obtenerNumero(avion->getNumeroDeRegistro())) {
                 aviones[i + 1] = aviones[i];
                 i--;
             }
-
             aviones[i + 1] = avion;
-            n = n + 1;
-        } else {
-            while (i >= 0 && obtenerNumero(aviones[i]->getNumeroDeRegistro()) > num_registro)
-                i--;
-
-            if (hijos[i + 1]->n == ORDEN - 1) {
-                dividirHijo(i + 1, hijos[i + 1]);
-
-                if (obtenerNumero(aviones[i + 1]->getNumeroDeRegistro()) < num_registro)
-                    i++;
+            n++;
+            for (int j = 0; j < n; j++) {
             }
-            hijos[i + 1]->insertarNoLleno(avion);
+        } else {
+            while (i >= 0 && obtenerNumero(aviones[i]->getNumeroDeRegistro()) > obtenerNumero(avion->getNumeroDeRegistro())) {
+                i--;
+            }
+            i++;
+            if (hijos[i]->n == ORDEN - 1) {
+                dividirHijo(i, hijos[i]);
+                if (obtenerNumero(aviones[i]->getNumeroDeRegistro()) < obtenerNumero(avion->getNumeroDeRegistro())) {
+                    i++;
+                }
+            }
+            hijos[i]->insertarNoLleno(avion);
+        }
+        
+        if (n == ORDEN - 1) {
         }
     }
 
     void dividirHijo(int i, NodoB* y) {
         NodoB* z = new NodoB(y->hoja);
-        z->n = (ORDEN / 2) - 1;
+        z->n = ORDEN / 2 - 1;
 
-        for (int j = 0; j < (ORDEN / 2) - 1; j++)
-            z->aviones[j] = y->aviones[j + (ORDEN / 2)];
-
-        if (!y->hoja) {
-            for (int j = 0; j < ORDEN / 2; j++)
-                z->hijos[j] = y->hijos[j + (ORDEN / 2)];
+        for (int j = 0; j < ORDEN / 2 - 1; j++) {
+            z->aviones[j] = y->aviones[j + ORDEN / 2];
         }
 
-        y->n = (ORDEN / 2) - 1;
+        if (!y->hoja) {
+            for (int j = 0; j < ORDEN / 2; j++) {
+                z->hijos[j] = y->hijos[j + ORDEN / 2];
+            }
+        }
 
-        for (int j = n; j >= i + 1; j--)
+        y->n = ORDEN / 2 - 1;
+
+        for (int j = n; j >= i + 1; j--) {
             hijos[j + 1] = hijos[j];
+        }
 
         hijos[i + 1] = z;
 
-        for (int j = n - 1; j >= i; j--)
+        for (int j = n - 1; j >= i; j--) {
             aviones[j + 1] = aviones[j];
+        }
 
-        aviones[i] = y->aviones[(ORDEN / 2) - 1];
-
-        n = n + 1;
+        aviones[i] = y->aviones[ORDEN / 2 - 1];
+        n++;
     }
 
     void recorrer() {
@@ -111,10 +117,13 @@ public:
         int miId = nodoId++;
         archivo << "    nodo" << miId << " [label=\"";
         for (int i = 0; i < n; i++) {
-            if (i > 0) archivo << " | ";
+            if (i > 0) archivo << "|";
             archivo << "<f" << i << "> " << aviones[i]->getNumeroDeRegistro();
         }
-        archivo << "\"];\n";
+        for (int i = n; i < ORDEN - 1; i++) {
+            archivo << "|<f" << i << "> ";
+        }
+        archivo << "\\nn=" << n << "\"];\n";
 
         for (int i = 0; i <= n; i++) {
             if (hijos[i] != nullptr) {
@@ -167,6 +176,30 @@ public:
 
         return hijos[i]->buscarRecursivo(numeroRegistro);
     }
+
+    void recorridoEnOrden() {
+        int i;
+        for (i = 0; i < n; i++) {
+            if (!hoja) hijos[i]->recorridoEnOrden();
+            cout << aviones[i]->getNumeroDeRegistro() << " ";
+        }
+        if (!hoja) hijos[i]->recorridoEnOrden();
+    }
+
+    void imprimirEstructura(int nivel = 0) {
+        for (int i = 0; i < nivel; i++) cout << "  ";
+        cout << "Nodo (n=" << n << ", hoja=" << (hoja ? "true" : "false") << "): ";
+        for (int i = 0; i < n; i++) {
+            cout << aviones[i]->getNumeroDeRegistro() << " ";
+        }
+        cout << endl;
+        
+        for (int i = 0; i <= n; i++) {
+            if (hijos[i] != nullptr) {
+                hijos[i]->imprimirEstructura(nivel + 1);
+            }
+        }
+    }
 };
 
 class ArbolB {
@@ -193,17 +226,21 @@ public:
             if (raiz->n == ORDEN - 1) {
                 NodoB* s = new NodoB(false);
                 s->hijos[0] = raiz;
-
                 s->dividirHijo(0, raiz);
-
                 int i = 0;
-                if (obtenerNumero(s->aviones[0]->getNumeroDeRegistro()) < obtenerNumero(avion->getNumeroDeRegistro()))
+                if (obtenerNumero(s->aviones[0]->getNumeroDeRegistro()) < obtenerNumero(avion->getNumeroDeRegistro())) {
                     i++;
+                }
                 s->hijos[i]->insertarNoLleno(avion);
-
                 raiz = s;
             } else {
                 raiz->insertarNoLleno(avion);
+                if (raiz->n == ORDEN - 1) {
+                    NodoB* s = new NodoB(false);
+                    s->hijos[0] = raiz;
+                    s->dividirHijo(0, raiz);
+                    raiz = s;
+                }
             }
         }
     }
@@ -222,6 +259,7 @@ public:
         archivo.close();
 
         system("dot -Tpng arbolB.dot -o arbolB.png");
+        system("arbolB.png");
     }
 
     void eliminar(string numero_de_registro) {
@@ -243,6 +281,21 @@ public:
             return nullptr;
         else
             return raiz->buscarRecursivo(numeroRegistro);
+    }
+
+    void recorridoEnOrden() {
+        if (raiz != nullptr) {
+            cout << "Recorrido en orden del árbol: ";
+            raiz->recorridoEnOrden();
+            cout << endl;
+        }
+    }
+
+    void imprimirEstructura() {
+        if (raiz != nullptr) {
+            cout << "Estructura del árbol:" << endl;
+            raiz->imprimirEstructura();
+        }
     }
 };
 

@@ -133,5 +133,41 @@
 		"aerolinea": "AirlineJ",
 		"ciudad_destino": "España",
 		"estado": "Disponible"
+	},
+	{
+		"vuelo": "A115",
+		"numero_de_registro": "N98554",
+		"modelo": "Boeing 548",
+		"capacidad": 365,
+		"aerolinea": "AirlineK",
+		"ciudad_destino": "Sevilla",
+		"estado": "Mantenimiento"
+	},
+	{
+		"vuelo": "A116",
+		"numero_de_registro": "N02479",
+		"modelo": "Boeing 324",
+		"capacidad": 514,
+		"aerolinea": "AirlineL",
+		"ciudad_destino": "Liverpool",
+		"estado": "Mantenimiento"
+	},
+	{
+		"vuelo": "A117",
+		"numero_de_registro": "N47254",
+		"modelo": "Boeing 451",
+		"capacidad": 145,
+		"aerolinea": "AirlineM",
+		"ciudad_destino": "Cadiz",
+		"estado": "Mantenimiento"
+	},
+	{
+		"vuelo": "A118",
+		"numero_de_registro": "N65558",
+		"modelo": "Boeing 444",
+		"capacidad": 250,
+		"aerolinea": "AirlineN",
+		"ciudad_destino": "Jaen",
+		"estado": "Mantenimiento"
 	}
 ]

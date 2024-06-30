@@ -26,7 +26,6 @@ void recomendarRuta();
 void visualizarReportes();
 PilotoBB convertirPilotoBB(const Piloto &piloto);
 void reporteArbolBinarioBusqueda();
-void reporteMatrizDispersa();
 
 // Variables globales
 ListaCircularDoble listaAvionesMantenimiento;
@@ -404,7 +403,6 @@ void visualizarReportes()
             listaRutas.generarGrafoGraphviz();
             break;
         case 6:
-            matrizVuelosCiudades.imprimirMatriz();
             matrizVuelosCiudades.generarGraficoGraphviz();
             break;
         case 7:
@@ -440,10 +438,4 @@ void reporteArbolBinarioBusqueda()
     
     // Abrir la imagen generada (en Windows)
     system("arbolPilotos.png");
-}
-
-void reporteMatrizDispersa()
-{
-    cout << "Matriz Dispersa - Vuelos y Ciudades:" << endl;
-    // Implementar
 }

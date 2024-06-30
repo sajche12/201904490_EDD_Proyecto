@@ -56,9 +56,6 @@ public:
                 }
                 actual = actual->derecha;
             }
-            cout << "No hay espacios vacíos en el vuelo " << piloto.vuelo << " para el piloto " << piloto.numero_de_id << endl;
-        } else {
-            cout << "No se encontró el vuelo " << piloto.vuelo << " para el piloto " << piloto.numero_de_id << endl;
         }
     }
 
