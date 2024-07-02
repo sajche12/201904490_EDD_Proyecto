@@ -252,7 +252,7 @@ void cargarMovimientos() {
                 // Extraer el número de registro del avión entre la , y el ;
                 string ingreso = linea.substr(linea.find(",") + 8 + 1, linea.find(";") - linea.find(",") - 9);
                 // Buscar el avion en el arbol de aviones disponibles e ingresarlo a la lista de mantenimiento
-                Avion* avion = arbolDisponible.buscarAvion(ingreso);
+                Avion* avion = arbolDisponible.buscar(ingreso);
                 if (avion != nullptr) {
                     Avion* avionNuevo = new Avion(avion->getVuelo(), avion->getNumeroDeRegistro(), avion->getModelo(), avion->getCapacidad(), avion->getAerolinea(), avion->getCiudadDestino(), "Mantenimiento");
                     listaAvionesMantenimiento.agregarAvion(*avionNuevo);
@@ -282,6 +282,7 @@ void cargarMovimientos() {
             }
         }
     }
+    file.close();
     cout << "\nMovimientos cargados exitosamente.\n" << endl;
 }
 
@@ -334,8 +335,12 @@ void recomendarRuta()
     string origen, destino;
     cout << "Origen: ";
     cin >> origen;
+    cin.clear(); // Limpia errores
+    cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Ignora el resto de la línea
     cout << "Destino: ";
     cin >> destino;
+    cin.clear(); // Limpia errores
+    cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Ignora el resto de la línea
 
     auto resultado = listaRutas.rutaCorta(origen, destino);
     // Paso 4: Verificar si la ruta es válida
@@ -388,7 +393,7 @@ void visualizarReportes()
         switch (opcion)
         {
         case 1:
-            arbolDisponible.generarDot();
+            arbolDisponible.generarReporteAvionesDisponibles();
             break;
         case 2:
             listaAvionesMantenimiento.generarDot();
